@@ -13,6 +13,7 @@ import uploadsRouter from './routes/uploads.routes';
 import authRouter from './routes/auth.routes';
 import profileRouter from './routes/profile.routes';
 import linkPreviewRouter from './routes/linkPreview.routes';
+import usersRouter from './routes/users.routes';
 import { requireAuth, type JwtUser } from './middleware/auth';
 
 import { prisma } from './prisma/client';
@@ -105,6 +106,7 @@ app.use('/api/uploads', requireAuth, uploadsRouter);
 app.use('/api/dms', requireAuth, dmsRouter);
 app.use('/api/video-sessions', requireAuth, videoSessionsRouter);
 app.use('/api/channels', requireAuth, channelsRouter);
+app.use('/api/users', requireAuth, usersRouter);
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
