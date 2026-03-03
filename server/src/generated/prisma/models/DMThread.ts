@@ -428,6 +428,7 @@ export type DMThreadCreateOrConnectWithoutUserAInput = {
 
 export type DMThreadCreateManyUserAInputEnvelope = {
   data: Prisma.DMThreadCreateManyUserAInput | Prisma.DMThreadCreateManyUserAInput[]
+  skipDuplicates?: boolean
 }
 
 export type DMThreadCreateWithoutUserBInput = {
@@ -451,6 +452,7 @@ export type DMThreadCreateOrConnectWithoutUserBInput = {
 
 export type DMThreadCreateManyUserBInputEnvelope = {
   data: Prisma.DMThreadCreateManyUserBInput | Prisma.DMThreadCreateManyUserBInput[]
+  skipDuplicates?: boolean
 }
 
 export type DMThreadUpsertWithWhereUniqueWithoutUserAInput = {
@@ -1345,6 +1347,7 @@ export type DMThreadCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many DMThreads.
    */
   data: Prisma.DMThreadCreateManyInput | Prisma.DMThreadCreateManyInput[]
+  skipDuplicates?: boolean
 }
 
 /**
@@ -1363,6 +1366,7 @@ export type DMThreadCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many DMThreads.
    */
   data: Prisma.DMThreadCreateManyInput | Prisma.DMThreadCreateManyInput[]
+  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */
