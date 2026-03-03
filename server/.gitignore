@@ -2,4 +2,16 @@ node_modules
 # Keep environment variables out of version control
 .env
 
-/generated/prisma
+# Build output
+dist
+
+# Local sqlite dev db (legacy)
+dev.db
+dev.db.bak
+
+# Uploads
+uploads
+
+# Generated prisma client
+src/generated
+src/generated/prisma
