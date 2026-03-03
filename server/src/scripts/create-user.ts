@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import prisma from './src/prisma/client';
-import { ensureAuthTables, setEmailVerified } from './src/services/authStore';
+import prisma from '../prisma/client';
+import { ensureAuthTables, setEmailVerified } from '../services/authStore';
 
 async function upsertUser(params: {
   email: string;

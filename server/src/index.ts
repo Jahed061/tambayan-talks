@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
-import { Server as SocketIOServer } from 'socket.io';
+import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
@@ -53,13 +53,15 @@ const app = express();
 
 // CORS: allow the Vite dev server (5173) and mobile devices on LAN.
 // Also ensure preflight requests succeed (important for WebView + Authorization header).
+
+const FRONTEND_ORIGIN = process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
+
 app.use(
   cors({
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
-  }),
+    origin: FRONTEND_ORIGIN,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
 );
 
 // Handle preflight early for every route
@@ -111,10 +113,10 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
 
-const io = new SocketIOServer(server, {
+const io = new Server(server, {
   cors: {
-    origin: true,
-    methods: ['GET', 'POST'],
+    origin: FRONTEND_ORIGIN,
+    methods: ["GET", "POST"],
   },
 });
 
