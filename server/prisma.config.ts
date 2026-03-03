@@ -4,11 +4,8 @@ import { defineConfig, env } from "prisma/config";
 export default defineConfig({
   schema: "prisma/schema.prisma",
 
-  // Prisma CLI (migrate deploy) uses connection URLs from config in Prisma 7
-  // NOTE: "datasources" is the supported key (plural).
-  datasources: {
-    db: {
-      url: env("DATABASE_URL"),
-    },
+  // Prisma 7: move the connection URL out of schema.prisma into prisma.config.ts
+  datasource: {
+    url: env("DATABASE_URL"),
   },
 });
