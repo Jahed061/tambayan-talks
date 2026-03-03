@@ -105,6 +105,7 @@ app.use('/api/uploads', requireAuth, uploadsRouter);
 app.use('/api/dms', requireAuth, dmsRouter);
 app.use('/api/video-sessions', requireAuth, videoSessionsRouter);
 app.use('/api/channels', requireAuth, channelsRouter);
+app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
 

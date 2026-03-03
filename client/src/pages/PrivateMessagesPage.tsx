@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
 import {
   DMMessageDTO,
   DMThreadDTO,
@@ -19,6 +19,7 @@ import {
 
 import LinkPreview from '../ui/LinkPreview';
 import { AvatarDot, AvatarStack } from '../ui/chatUi';
+import { socket as sharedSocket } from '../socket';
 
 import EmojiPicker from '../ui/EmojiPicker';
 import {
@@ -28,10 +29,6 @@ import {
 } from '../ui/customEmojis';
 
 type Props = { currentUser: CurrentUserDTO };
-
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ??
-  `http://${window.location.hostname}:4000`;
 
 type Toast = { id: string; title: string; body: string; kind?: 'error' | 'success' };
 
@@ -471,10 +468,12 @@ const PrivateMessagesPage: React.FC<Props> = ({ currentUser }) => {
       sessionStorage.setItem('token', token);
     }
 
-    socketRef.current?.disconnect();
-
-    const socket = io(SOCKET_URL, { auth: { token } });
+    // Reuse singleton socket to avoid multiple concurrent connections.
+    const socket = sharedSocket;
+    socket.disconnect();
+    socket.auth = { token };
     socketRef.current = socket;
+    socket.connect();
 
     const handleDmMessage = (dto: DMMessageDTO) => {
       const currentActive = activeThreadIdRef.current;
@@ -1071,7 +1070,7 @@ const PrivateMessagesPage: React.FC<Props> = ({ currentUser }) => {
                       textAlign: 'left',
                     }}
                   >
-                    <AvatarDot name={u.displayName} url={u.avatarUrl ?? null} size={34} />
+                    <AvatarDot name={u.displayName} src={u.avatarUrl ?? null} size={34} />
                     <div style={{ display: 'grid', gap: 2, minWidth: 0 }}>
                       <div style={{ fontWeight: 950, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {highlight(u.displayName, userQuery)}
