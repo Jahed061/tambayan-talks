@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -428,7 +428,6 @@ export type DMThreadCreateOrConnectWithoutUserAInput = {
 
 export type DMThreadCreateManyUserAInputEnvelope = {
   data: Prisma.DMThreadCreateManyUserAInput | Prisma.DMThreadCreateManyUserAInput[]
-  skipDuplicates?: boolean
 }
 
 export type DMThreadCreateWithoutUserBInput = {
@@ -452,7 +451,6 @@ export type DMThreadCreateOrConnectWithoutUserBInput = {
 
 export type DMThreadCreateManyUserBInputEnvelope = {
   data: Prisma.DMThreadCreateManyUserBInput | Prisma.DMThreadCreateManyUserBInput[]
-  skipDuplicates?: boolean
 }
 
 export type DMThreadUpsertWithWhereUniqueWithoutUserAInput = {
@@ -1347,7 +1345,6 @@ export type DMThreadCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * The data used to create many DMThreads.
    */
   data: Prisma.DMThreadCreateManyInput | Prisma.DMThreadCreateManyInput[]
-  skipDuplicates?: boolean
 }
 
 /**
@@ -1366,7 +1363,6 @@ export type DMThreadCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * The data used to create many DMThreads.
    */
   data: Prisma.DMThreadCreateManyInput | Prisma.DMThreadCreateManyInput[]
-  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

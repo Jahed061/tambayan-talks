@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -812,7 +812,6 @@ export type MessageCreateOrConnectWithoutSenderInput = {
 
 export type MessageCreateManySenderInputEnvelope = {
   data: Prisma.MessageCreateManySenderInput | Prisma.MessageCreateManySenderInput[]
-  skipDuplicates?: boolean
 }
 
 export type MessageCreateWithoutPinnedByInput = {
@@ -860,7 +859,6 @@ export type MessageCreateOrConnectWithoutPinnedByInput = {
 
 export type MessageCreateManyPinnedByInputEnvelope = {
   data: Prisma.MessageCreateManyPinnedByInput | Prisma.MessageCreateManyPinnedByInput[]
-  skipDuplicates?: boolean
 }
 
 export type MessageUpsertWithWhereUniqueWithoutSenderInput = {
@@ -959,7 +957,6 @@ export type MessageCreateOrConnectWithoutChannelInput = {
 
 export type MessageCreateManyChannelInputEnvelope = {
   data: Prisma.MessageCreateManyChannelInput | Prisma.MessageCreateManyChannelInput[]
-  skipDuplicates?: boolean
 }
 
 export type MessageUpsertWithWhereUniqueWithoutChannelInput = {
@@ -1066,7 +1063,6 @@ export type MessageCreateOrConnectWithoutReplyToInput = {
 
 export type MessageCreateManyReplyToInputEnvelope = {
   data: Prisma.MessageCreateManyReplyToInput | Prisma.MessageCreateManyReplyToInput[]
-  skipDuplicates?: boolean
 }
 
 export type MessageUpsertWithoutRepliesInput = {
@@ -2545,7 +2541,6 @@ export type MessageCreateManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    * The data used to create many Messages.
    */
   data: Prisma.MessageCreateManyInput | Prisma.MessageCreateManyInput[]
-  skipDuplicates?: boolean
 }
 
 /**
@@ -2564,7 +2559,6 @@ export type MessageCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extensi
    * The data used to create many Messages.
    */
   data: Prisma.MessageCreateManyInput | Prisma.MessageCreateManyInput[]
-  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

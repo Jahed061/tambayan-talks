@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -520,7 +520,6 @@ export type VideoSessionCreateOrConnectWithoutTeacherInput = {
 
 export type VideoSessionCreateManyTeacherInputEnvelope = {
   data: Prisma.VideoSessionCreateManyTeacherInput | Prisma.VideoSessionCreateManyTeacherInput[]
-  skipDuplicates?: boolean
 }
 
 export type VideoSessionUpsertWithWhereUniqueWithoutTeacherInput = {
@@ -583,7 +582,6 @@ export type VideoSessionCreateOrConnectWithoutChannelInput = {
 
 export type VideoSessionCreateManyChannelInputEnvelope = {
   data: Prisma.VideoSessionCreateManyChannelInput | Prisma.VideoSessionCreateManyChannelInput[]
-  skipDuplicates?: boolean
 }
 
 export type VideoSessionUpsertWithWhereUniqueWithoutChannelInput = {
@@ -1439,7 +1437,6 @@ export type VideoSessionCreateManyArgs<ExtArgs extends runtime.Types.Extensions.
    * The data used to create many VideoSessions.
    */
   data: Prisma.VideoSessionCreateManyInput | Prisma.VideoSessionCreateManyInput[]
-  skipDuplicates?: boolean
 }
 
 /**
@@ -1458,7 +1455,6 @@ export type VideoSessionCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Ex
    * The data used to create many VideoSessions.
    */
   data: Prisma.VideoSessionCreateManyInput | Prisma.VideoSessionCreateManyInput[]
-  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

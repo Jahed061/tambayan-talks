@@ -4,10 +4,16 @@ import ChatPage from './pages/ChatPage';
 import PrivateMessagesPage from './pages/PrivateMessagesPage';
 import ProfilePage from './pages/ProfilePage';
 import LoginPage from './pages/LoginPage';
+import LandingPage from './pages/LandingPage';
+import PrivacyPage from './pages/PrivacyPage';
+import TermsPage from './pages/TermsPage';
+import ContactPage from './pages/ContactPage';
 import type { CurrentUserDTO } from './api/http';
 import { guestLogin, me, setToken as setApiToken } from './api/http';
 
 type View = 'sessions' | 'chat' | 'dm' | 'profile';
+
+type PublicView = 'home' | 'login' | 'privacy' | 'terms' | 'contact';
 
 type ChatDeepLink = { channelId?: string; messageId?: string };
 
@@ -22,6 +28,28 @@ function parseHash(): { view?: View; chat?: ChatDeepLink } {
   const channelId = parts[0];
   const messageId = parts[1];
   return { view: 'chat', chat: { channelId, messageId } };
+}
+
+
+function parsePublicHash(): PublicView {
+  const raw = (window.location.hash || '').replace(/^#/, '');
+  const key = raw.split('?')[0].split('/')[0].trim().toLowerCase();
+
+  switch (key) {
+    case '':
+    case 'home':
+      return 'home';
+    case 'login':
+      return 'login';
+    case 'privacy':
+      return 'privacy';
+    case 'terms':
+      return 'terms';
+    case 'contact':
+      return 'contact';
+    default:
+      return 'home';
+  }
 }
 
 type IconName = 'logout' | 'profile' | 'sessions' | 'chat' | 'dm';
@@ -104,6 +132,14 @@ function Icon({ name }: { name: IconName }) {
 
 function App() {
   const [view, setView] = useState<View>('dm');
+  const [publicView, setPublicView] = useState<PublicView>(() => parsePublicHash());
+
+  useEffect(() => {
+    const onHash = () => setPublicView(parsePublicHash());
+    window.addEventListener('hashchange', onHash);
+    return () => window.removeEventListener('hashchange', onHash);
+  }, []);
+
 
   // Keep the top navigation visible and prevent route changes from leaving the window scrolled.
   useEffect(() => {
@@ -209,12 +245,19 @@ function App() {
 
   if (!token || !currentUser || needsUsername) {
     // token/currentUser can be present (guest), but username may still be pending.
-    return (
-      <LoginPage
-        user={currentUser}
-        onProfileUpdated={(user) => setCurrentUser(user)}
-      />
-    );
+    if (needsUsername || publicView === 'login') {
+      return (
+        <LoginPage
+          user={currentUser}
+          onProfileUpdated={(user) => setCurrentUser(user)}
+        />
+      );
+    }
+
+    if (publicView === 'privacy') return <PrivacyPage />;
+    if (publicView === 'terms') return <TermsPage />;
+    if (publicView === 'contact') return <ContactPage />;
+    return <LandingPage />;
   }
 
   // --------- Logged in: main app layout ----------

@@ -23,20 +23,18 @@ router.get('/search', async (req, res) => {
       return res.json([]);
     }
 
-    // Use Prisma filters for portability (Postgres/MySQL/etc.).
-    // Postgres supports case-insensitive search via `mode: 'insensitive'`.
-    const rows = await prisma.user.findMany({
-      where: {
-        id: { not: currentUserId },
-        OR: [
-          { displayName: { contains: q, mode: 'insensitive' } },
-          { email: { contains: q, mode: 'insensitive' } },
-        ],
-      },
-      select: { id: true, email: true, displayName: true, role: true },
-      orderBy: [{ displayName: 'asc' }],
-      take: 20,
-    });
+    // SQLite + Prisma in this repo doesn't support case-insensitive `mode` filters reliably.
+    // Use a small, safe raw query with LOWER() to make search case-insensitive.
+    const like = `%${q}%`;
+
+    const rows = (await prisma.$queryRaw`
+      SELECT id, email, displayName, role
+      FROM User
+      WHERE id != ${currentUserId}
+        AND (LOWER(displayName) LIKE ${like} OR LOWER(email) LIKE ${like})
+      ORDER BY displayName ASC
+      LIMIT 20
+    `) as Array<{ id: string; email: string; displayName: string; role: string }>;
 
     const ids = rows.map((r) => r.id);
     const avatarMap = await getAvatarUrlMap(ids);

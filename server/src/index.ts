@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
-import { Server } from 'socket.io';
+import { Server as SocketIOServer } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
@@ -13,7 +13,6 @@ import uploadsRouter from './routes/uploads.routes';
 import authRouter from './routes/auth.routes';
 import profileRouter from './routes/profile.routes';
 import linkPreviewRouter from './routes/linkPreview.routes';
-import usersRouter from './routes/users.routes';
 import { requireAuth, type JwtUser } from './middleware/auth';
 
 import { prisma } from './prisma/client';
@@ -53,15 +52,13 @@ const app = express();
 
 // CORS: allow the Vite dev server (5173) and mobile devices on LAN.
 // Also ensure preflight requests succeed (important for WebView + Authorization header).
-
-const FRONTEND_ORIGIN = process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
-
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false,
+  }),
 );
 
 // Handle preflight early for every route
@@ -108,15 +105,14 @@ app.use('/api/uploads', requireAuth, uploadsRouter);
 app.use('/api/dms', requireAuth, dmsRouter);
 app.use('/api/video-sessions', requireAuth, videoSessionsRouter);
 app.use('/api/channels', requireAuth, channelsRouter);
-app.use('/api/users', requireAuth, usersRouter);
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
 
-const io = new Server(server, {
+const io = new SocketIOServer(server, {
   cors: {
-    origin: FRONTEND_ORIGIN,
-    methods: ["GET", "POST"],
+    origin: true,
+    methods: ['GET', 'POST'],
   },
 });
 

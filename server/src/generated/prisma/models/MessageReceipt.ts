@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -430,7 +430,6 @@ export type MessageReceiptCreateOrConnectWithoutUserInput = {
 
 export type MessageReceiptCreateManyUserInputEnvelope = {
   data: Prisma.MessageReceiptCreateManyUserInput | Prisma.MessageReceiptCreateManyUserInput[]
-  skipDuplicates?: boolean
 }
 
 export type MessageReceiptUpsertWithWhereUniqueWithoutUserInput = {
@@ -481,7 +480,6 @@ export type MessageReceiptCreateOrConnectWithoutMessageInput = {
 
 export type MessageReceiptCreateManyMessageInputEnvelope = {
   data: Prisma.MessageReceiptCreateManyMessageInput | Prisma.MessageReceiptCreateManyMessageInput[]
-  skipDuplicates?: boolean
 }
 
 export type MessageReceiptUpsertWithWhereUniqueWithoutMessageInput = {
@@ -1281,7 +1279,6 @@ export type MessageReceiptCreateManyArgs<ExtArgs extends runtime.Types.Extension
    * The data used to create many MessageReceipts.
    */
   data: Prisma.MessageReceiptCreateManyInput | Prisma.MessageReceiptCreateManyInput[]
-  skipDuplicates?: boolean
 }
 
 /**
@@ -1300,7 +1297,6 @@ export type MessageReceiptCreateManyAndReturnArgs<ExtArgs extends runtime.Types.
    * The data used to create many MessageReceipts.
    */
   data: Prisma.MessageReceiptCreateManyInput | Prisma.MessageReceiptCreateManyInput[]
-  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */

@@ -1,10 +1,9 @@
 // client/src/pages/ChatPage.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Socket } from 'socket.io-client';
+import { io, Socket } from 'socket.io-client';
 import { createChannel, getChannels, getMessages, uploadAttachments } from '../api/http';
 import type { Channel, ChatMessageDTO, CurrentUserDTO, ReactionEmoji, MessageAttachmentDTO } from '../api/http';
 import { AvatarDot, AvatarStack, highlight } from '../ui/chatUi';
-import { socket as sharedSocket } from '../socket';
 import EmojiPicker from '../ui/EmojiPicker';
 import LinkPreview from '../ui/LinkPreview';
 import {
@@ -55,6 +54,10 @@ function lastSeenLabel(lastSeenMs: number) {
   if (day < 7) return `last seen ${day}d ago`;
   return `last seen ${new Date(lastSeenMs).toLocaleDateString()}`;
 }
+
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ??
+  `http://${window.location.hostname}:4000`;
 
 function normalizeMentionKey(name: string) {
   return name.toLowerCase().replace(/\s+/g, '');
@@ -293,12 +296,10 @@ useEffect(() => {
   useEffect(() => {
     if (!token) return;
 
-    // Reuse singleton socket to avoid multiple concurrent connections.
-    const socket = sharedSocket;
-    socket.disconnect();
-    socket.auth = { token };
+    socketRef.current?.disconnect();
+
+    const socket = io(SOCKET_URL, { auth: { token } });
     socketRef.current = socket;
-    socket.connect();
 
     socket.on('connect', () => console.log('[socket] connected', socket.id));
     socket.on('connect_error', (err) => console.error('[socket] connect_error', err.message));

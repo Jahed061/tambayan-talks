@@ -8,7 +8,7 @@
  *
  * 🟢 You can import this file directly.
  */
-import type * as runtime from "@prisma/client/runtime/library"
+import type * as runtime from "@prisma/client/runtime/client"
 import type * as $Enums from "../enums"
 import type * as Prisma from "../internal/prismaNamespace"
 
@@ -431,7 +431,6 @@ export type MessageReactionCreateOrConnectWithoutUserInput = {
 
 export type MessageReactionCreateManyUserInputEnvelope = {
   data: Prisma.MessageReactionCreateManyUserInput | Prisma.MessageReactionCreateManyUserInput[]
-  skipDuplicates?: boolean
 }
 
 export type MessageReactionUpsertWithWhereUniqueWithoutUserInput = {
@@ -482,7 +481,6 @@ export type MessageReactionCreateOrConnectWithoutMessageInput = {
 
 export type MessageReactionCreateManyMessageInputEnvelope = {
   data: Prisma.MessageReactionCreateManyMessageInput | Prisma.MessageReactionCreateManyMessageInput[]
-  skipDuplicates?: boolean
 }
 
 export type MessageReactionUpsertWithWhereUniqueWithoutMessageInput = {
@@ -1282,7 +1280,6 @@ export type MessageReactionCreateManyArgs<ExtArgs extends runtime.Types.Extensio
    * The data used to create many MessageReactions.
    */
   data: Prisma.MessageReactionCreateManyInput | Prisma.MessageReactionCreateManyInput[]
-  skipDuplicates?: boolean
 }
 
 /**
@@ -1301,7 +1298,6 @@ export type MessageReactionCreateManyAndReturnArgs<ExtArgs extends runtime.Types
    * The data used to create many MessageReactions.
    */
   data: Prisma.MessageReactionCreateManyInput | Prisma.MessageReactionCreateManyInput[]
-  skipDuplicates?: boolean
   /**
    * Choose, which related nodes to fetch as well
    */
