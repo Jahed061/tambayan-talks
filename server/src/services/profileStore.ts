@@ -97,7 +97,7 @@ export async function searchUsers(query: string, limit = 10): Promise<Array<{ us
   return rows;
 }
 
-export async function getAvatarUrl(userId: string): Promise<string | null> {
+export async function getAvatarUrl (userId: string): Promise<string | null> {
   await ensureProfileTables();
 
   const rows = await prisma.$queryRawUnsafe<Array<{ avatarUrl: string | null }>>(
