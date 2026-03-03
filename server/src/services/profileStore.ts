@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '../generated/prisma/client';
 import prisma from '../prisma/client';
 
 /**
@@ -44,7 +44,7 @@ export async function getAvatarUrl(userId: string): Promise<string | null> {
   return rows[0]?.avatarUrl ?? null;
 }
 
-export async function setAvatarUrl(userId: string, avatarUrl: string) {
+export async function setAvatarUrl(userId: string, avatarUrl: string | null) {
   await ensureProfileTable();
 
   await prisma.$executeRaw(
@@ -57,13 +57,15 @@ export async function setAvatarUrl(userId: string, avatarUrl: string) {
   );
 }
 
-export async function setLastSeenAtMs(userId: string, lastSeenAt: number) {
+export async function setLastSeenAtMs(userId: string, lastSeenAt: number | null) {
   await ensureProfileTable();
+
+  const lastSeenAtBig = lastSeenAt === null ? null : BigInt(lastSeenAt);
 
   await prisma.$executeRaw(
     Prisma.sql`
       INSERT INTO ${Prisma.raw(TABLE)} ("userId", "lastSeenAt")
-      VALUES (${userId}, ${BigInt(lastSeenAt)})
+      VALUES (${userId}, ${lastSeenAtBig})
       ON CONFLICT ("userId") DO UPDATE
       SET "lastSeenAt" = EXCLUDED."lastSeenAt"
     `,
@@ -87,7 +89,7 @@ export async function getLastSeenAtMs(userId: string): Promise<number | null> {
   return typeof v === 'bigint' ? Number(v) : v;
 }
 
-export async function getAllLastSeenAtMsMap(userIds: string[]) {
+export async function getAllLastSeenAtMsMap(userIds: string[] = []) {
   await ensureProfileTable();
   const map = new Map<string, number>();
   if (!userIds.length) return map;

@@ -13,7 +13,6 @@ import uploadsRouter from './routes/uploads.routes';
 import authRouter from './routes/auth.routes';
 import profileRouter from './routes/profile.routes';
 import linkPreviewRouter from './routes/linkPreview.routes';
-import usersRouter from './routes/users.routes';
 import { requireAuth, type JwtUser } from './middleware/auth';
 
 import { prisma } from './prisma/client';
@@ -101,7 +100,6 @@ app.use(
 // REST
 app.use('/api', authRouter);
 app.use('/api/profile', requireAuth, profileRouter);
-app.use('/api/users', requireAuth, usersRouter);
 app.use('/api/link-preview', requireAuth, linkPreviewRouter);
 app.use('/api/uploads', requireAuth, uploadsRouter);
 app.use('/api/dms', requireAuth, dmsRouter);
