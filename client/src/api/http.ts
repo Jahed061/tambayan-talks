@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:4000`;
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? "";
 
 
 // Keep token in memory + storage (supports both localStorage and localStorage)
