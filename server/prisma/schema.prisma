@@ -1,0 +1,186 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  // url is configured in prisma.config.ts via DATABASE_URL
+}
+
+model User {
+  id                String             @id @default(cuid())
+  email             String             @unique
+  password          String
+  displayName       String
+  role              UserRole           @default(STUDENT)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  sessions          VideoSession[]     @relation("TeacherSessions")
+  sentMessages      Message[]          @relation("MessageSender")
+  pinnedMessages    Message[]          @relation("MessagePinnedBy")
+  messageReactions  MessageReaction[]
+  dmThreadsA        DMThread[]         @relation("DmUserA")
+  dmThreadsB        DMThread[]         @relation("DmUserB")
+  dmMessages        DMMessage[]
+  messageReceipts   MessageReceipt[]
+  dmMessageReceipts DMMessageReceipt[]
+}
+
+model Channel {
+  id          String         @id @default(cuid())
+  name        String
+  description String?
+  isPrivate   Boolean        @default(false)
+  ownerId     String
+  createdAt   DateTime       @default(now())
+  sessions    VideoSession[]
+  messages    Message[]
+}
+
+model VideoSession {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  teacherId   String
+  teacher     User     @relation("TeacherSessions", fields: [teacherId], references: [id])
+  channelId   String?
+  channel     Channel? @relation(fields: [channelId], references: [id])
+  startTime   DateTime
+  endTime     DateTime
+  videoLink   String
+  createdAt   DateTime @default(now())
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum AttachmentKind {
+  IMAGE
+  PDF
+  AUDIO
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  content   String
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+
+  // Reply / quote threading
+  replyTo   Message?  @relation("MessageReplies", fields: [replyToId], references: [id])
+  replyToId String?
+  replies   Message[] @relation("MessageReplies")
+
+  // Pin + announcements
+  isPinned       Boolean   @default(false)
+  isAnnouncement Boolean   @default(false)
+  pinnedAt       DateTime?
+  pinnedBy       User?     @relation("MessagePinnedBy", fields: [pinnedById], references: [id])
+  pinnedById     String?
+
+  channel   Channel @relation(fields: [channelId], references: [id])
+  channelId String
+
+  sender   User   @relation("MessageSender", fields: [senderId], references: [id])
+  senderId String
+
+  reactions MessageReaction[]
+
+  attachments MessageAttachment[]
+
+  receipts MessageReceipt[]
+}
+
+model MessageAttachment {
+  id        String         @id @default(cuid())
+  kind      AttachmentKind
+  url       String
+  mimeType  String
+  fileName  String
+  size      Int
+  createdAt DateTime       @default(now())
+
+  // optional metadata
+  width      Int?
+  height     Int?
+  durationMs Int?
+
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String
+
+  @@index([messageId])
+}
+
+model MessageReaction {
+  id        String   @id @default(cuid())
+  emoji     String
+  createdAt DateTime @default(now())
+
+  message   Message @relation(fields: [messageId], references: [id])
+  messageId String
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+}
+
+model DMThread {
+  id        String      @id @default(cuid())
+  userA     User        @relation("DmUserA", fields: [userAId], references: [id])
+  userAId   String
+  userB     User        @relation("DmUserB", fields: [userBId], references: [id])
+  userBId   String
+  createdAt DateTime    @default(now())
+  messages  DMMessage[]
+}
+
+model DMMessage {
+  id        String             @id @default(cuid())
+  thread    DMThread           @relation(fields: [threadId], references: [id])
+  threadId  String
+  sender    User               @relation(fields: [senderId], references: [id])
+  senderId  String
+  content   String
+  createdAt DateTime           @default(now())
+  receipts  DMMessageReceipt[]
+}
+
+model MessageReceipt {
+  id        String  @id @default(cuid())
+  message   Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  messageId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  deliveredAt DateTime?
+  seenAt      DateTime?
+
+  @@unique([messageId, userId])
+  @@index([userId, seenAt])
+  @@index([messageId, seenAt])
+}
+
+model DMMessageReceipt {
+  id          String    @id @default(cuid())
+  dmMessage   DMMessage @relation(fields: [dmMessageId], references: [id], onDelete: Cascade)
+  dmMessageId String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  deliveredAt DateTime?
+  seenAt      DateTime?
+
+  @@unique([dmMessageId, userId])
+  @@index([userId, seenAt])
+  @@index([dmMessageId, seenAt])
+}

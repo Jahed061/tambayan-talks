@@ -1,0 +1,541 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  *, ::before, ::after { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { font-family: theme('fontFamily.sans'); }
+  ::selection { background: rgba(0, 132, 255, 0.22); }
+  :focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(0, 132, 255, 0.18); border-radius: 12px; }
+}
+
+@layer components {
+  /* Optional Tailwind-powered primitives you can use across pages (keeps your existing tt-* design language). */
+  .tt-container { @apply mx-auto w-full max-w-6xl px-4 md:px-6; }
+  .tt-page { @apply min-h-full; }
+  .tt-page-header { @apply flex items-center justify-between gap-3 mb-4; }
+  .tt-h1 { @apply text-xl md:text-2xl font-extrabold tracking-tight; }
+  .tt-h2 { @apply text-lg md:text-xl font-extrabold tracking-tight; }
+  .tt-subtle { @apply text-sm text-slate-600; }
+
+  .tt-card { @apply rounded-xl border border-slate-200 bg-white/80 shadow-soft backdrop-blur; }
+  .tt-card-pad { @apply p-4 md:p-6; }
+
+  .tt-btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-extrabold transition; }
+  .tt-btn-primary { @apply text-white; }
+  .tt-btn-primary { background: linear-gradient(135deg, var(--tt-accent) 0%, var(--tt-accent-2) 60%, var(--tt-accent-3) 100%); }
+  .tt-btn-ghost { @apply border border-slate-200 bg-white/70 text-slate-800 hover:bg-white; }
+  .tt-btn-danger { @apply border border-red-200 bg-white/70 text-red-700 hover:bg-white; }
+
+  .tt-field { @apply w-full rounded-full border border-slate-200 bg-white/70 px-4 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-slate-300; }
+  .tt-field:focus { box-shadow: 0 0 0 4px rgba(0, 132, 255, 0.18); }
+  .tt-textarea { @apply w-full rounded-2xl border border-slate-200 bg-white/70 px-4 py-3 text-sm text-slate-900 placeholder:text-slate-400; }
+  .tt-textarea:focus { box-shadow: 0 0 0 4px rgba(0, 132, 255, 0.18); }
+
+  .tt-badge { @apply inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-0.5 text-[11px] font-extrabold text-slate-700; }
+  /* Skeleton / loading */
+  .tt-skeleton { @apply animate-pulse rounded-xl bg-slate-200/70; }
+
+  /* Inline alerts */
+  .tt-error { @apply rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700; }
+  .tt-success { @apply rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800; }
+
+  /* Toasts (simple, lightweight) */
+  .tt-toast-wrap { @apply fixed top-4 right-4 z-[9999] flex flex-col gap-2; }
+  .tt-toast { @apply tt-card px-3 py-2 text-sm font-semibold text-slate-800; }
+  .tt-toast--error { @apply border-red-200 bg-red-50 text-red-800; }
+  .tt-toast--success { @apply border-emerald-200 bg-emerald-50 text-emerald-900; }
+
+  /* iOS safe-area helper */
+  .tt-safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+}
+
+:root {
+  /* Viewport strategy:
+     - default to modern 100dvh
+     - allow JS (visualViewport) to override by writing a px value into --tt-app-h */
+  --tt-app-h: 100dvh;
+  --tt-topnav-h: 56px;
+
+  /* Messenger-like: rounded, friendly, colorful */
+  --tt-bg-a: #f6f7ff;
+  --tt-bg-b: #fff1f8;
+
+  --tt-surface: rgba(255, 255, 255, 0.86);
+  --tt-surface-solid: #ffffff;
+  --tt-border: rgba(15, 23, 42, 0.10);
+  --tt-text: #0f172a;
+  --tt-muted: #64748b;
+  --tt-muted-2: rgba(15, 23, 42, 0.55);
+
+  --tt-accent: #0084ff;
+  --tt-accent-2: #6a5cff;
+  --tt-accent-3: #ff4fd8;
+
+  --tt-bubble-in: #f0f2f5;
+  --tt-bubble-in-text: #0f172a;
+  --tt-bubble-out: linear-gradient(135deg, #00c6ff 0%, #0072ff 55%, #6a5cff 100%);
+  --tt-bubble-out-text: #ffffff;
+
+  --tt-shadow: 0 18px 50px rgba(15, 23, 42, 0.12);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Prevent the *window* from scrolling */
+body {
+  overflow: hidden;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--tt-text);
+  background:
+    radial-gradient(1100px 600px at 16% 12%, rgba(255, 241, 248, 0.95) 0%, rgba(255, 241, 248, 0) 62%),
+    radial-gradient(900px 520px at 86% 10%, rgba(224, 242, 254, 0.9) 0%, rgba(224, 242, 254, 0) 60%),
+    radial-gradient(900px 900px at 64% 102%, rgba(233, 213, 255, 0.82) 0%, rgba(233, 213, 255, 0) 60%),
+    linear-gradient(180deg, var(--tt-bg-a), #ffffff);
+}
+
+a {
+  color: var(--tt-accent);
+}
+
+/* iOS momentum scrolling + consistent scroller feel */
+.tt-scroll {
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+/* Minimum touch targets (mobile-first) */
+.tt-iconbtn,
+.tt-bottomnav-item,
+.tt-btn,
+.tt-pill,
+.tt-input,
+.tt-field,
+.tt-textarea {
+  min-height: 44px;
+}
+
+.tt-iconbtn,
+.tt-bottomnav-item {
+  min-width: 44px;
+}
+
+/* Reusable scroll container with hidden scrollbar */
+.scroll-column {
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+}
+.scroll-column::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Panels */
+.tt-panel {
+  background: var(--tt-surface);
+  border: 1px solid var(--tt-border);
+  border-radius: 18px;
+  box-shadow: var(--tt-shadow);
+  backdrop-filter: blur(10px);
+}
+
+/* Inputs */
+.tt-input {
+  border: 1px solid var(--tt-border);
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 999px;
+  padding: 0.55rem 0.85rem;
+  font-size: 14px;
+  color: var(--tt-text);
+}
+.tt-input:focus {
+  outline: none;
+  border-color: rgba(0, 132, 255, 0.35);
+  box-shadow: 0 0 0 4px rgba(0, 132, 255, 0.18);
+}
+
+/* Pills / buttons */
+.tt-pill {
+  border: 1px solid var(--tt-border);
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 999px;
+  padding: 0.32rem 0.7rem;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--tt-text);
+}
+
+.tt-pill:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 132, 255, 0.16);
+}
+
+.tt-pill-primary {
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, var(--tt-accent) 0%, var(--tt-accent-2) 60%, var(--tt-accent-3) 100%);
+}
+
+.tt-chip {
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+  font-weight: 800;
+  font-size: 12px;
+}
+
+/* Bubbles */
+.tt-bubble-in {
+  background: var(--tt-bubble-in);
+  color: var(--tt-bubble-in-text);
+}
+.tt-bubble-out {
+  background: var(--tt-bubble-out);
+  color: var(--tt-bubble-out-text);
+}
+
+/* Chat shell: stable flex scrolling (no !important) */
+.tt-chat-shell {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  gap: 14px;
+}
+
+.tt-chat-sidebar {
+  width: 320px;
+  max-width: 100%;
+  min-width: 280px;
+  min-height: 0;
+}
+
+.tt-chat-main {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tt-chat-messages {
+  flex: 1;
+  min-height: 0;
+}
+
+.tt-chat-composer {
+  position: sticky;
+  bottom: 0;
+  padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.70);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+@media (max-width: 768px) {
+  .tt-chat-shell {
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: calc(10px + var(--tt-bottomnav-h) + env(safe-area-inset-bottom));
+  }
+  .tt-chat-sidebar {
+    width: 100%;
+    max-height: none;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+  }
+}
+
+
+/* =========================
+   App shell + top navigation
+   ========================= */
+.tt-app {
+  height: var(--tt-app-h);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tt-app-main {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 14px;
+}
+
+.tt-in-messages .tt-app-main {
+  /* Chat/DM pages manage their own internal scrollers.
+     Prevent the outer main container from becoming the scroll target (mobile jump/lock bug). */
+  overflow: hidden;
+  padding-bottom: 0;
+}
+
+/* Top nav: compact, icon-based */
+.tt-topnav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  min-height: 56px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--tt-border);
+  background: rgba(255, 255, 255, 0.74);
+  backdrop-filter: blur(12px);
+}
+
+.tt-topnav-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.tt-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  user-select: none;
+}
+
+.tt-brand-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, var(--tt-accent) 0%, var(--tt-accent-2) 60%, var(--tt-accent-3) 120%);
+  box-shadow: 0 14px 30px rgba(0, 132, 255, 0.22);
+  letter-spacing: -0.02em;
+}
+
+.tt-brand-text {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--tt-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tt-userbadge {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--tt-border);
+  background: rgba(255, 255, 255, 0.72);
+  white-space: nowrap;
+}
+
+.tt-userbadge-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--tt-text);
+}
+
+.tt-userbadge-role {
+  font-size: 11px;
+  font-weight: 900;
+  color: rgba(15, 23, 42, 0.62);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(15, 23, 42, 0.03);
+}
+
+.tt-topnav-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tt-topnav-actions::-webkit-scrollbar { width: 0; height: 0; }
+
+.tt-topnav-divider {
+  width: 1px;
+  height: 26px;
+  background: rgba(15, 23, 42, 0.12);
+  border-radius: 99px;
+  margin: 0 2px;
+}
+
+.tt-iconbtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  background: rgba(255, 255, 255, 0.78);
+  color: rgba(15, 23, 42, 0.78);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.tt-iconbtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.10);
+  border-color: rgba(0, 132, 255, 0.22);
+}
+
+.tt-iconbtn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 132, 255, 0.18);
+  border-color: rgba(0, 132, 255, 0.28);
+}
+
+.tt-iconbtn.is-active {
+  background: linear-gradient(135deg, rgba(0, 132, 255, 0.18) 0%, rgba(106, 92, 255, 0.14) 70%);
+  border-color: rgba(0, 132, 255, 0.28);
+  color: rgba(0, 132, 255, 0.95);
+}
+
+.tt-iconbtn.is-danger {
+  background: rgba(255, 255, 255, 0.78);
+}
+.tt-iconbtn.is-danger:hover {
+  border-color: rgba(239, 68, 68, 0.35);
+  color: rgba(185, 28, 28, 1);
+}
+
+@media (max-width: 768px) {
+  .tt-app-main { padding: 10px; }
+  .tt-brand-text { display: none; } /* keep nav compact on phones */
+  .tt-userbadge { display: none; }  /* avoid crowding on small screens */
+}
+
+
+/* =========================
+   Mobile bottom navigation
+   ========================= */
+:root {
+  --tt-bottomnav-h: 64px;
+}
+
+.tt-bottomnav {
+  display: none; /* desktop: hidden */
+}
+
+@media (max-width: 768px) {
+  /* Make main area scrollable and leave space for bottom nav */
+  .tt-app-main {
+    overflow: auto;
+    padding-bottom: calc(var(--tt-bottomnav-h) + env(safe-area-inset-bottom) + 12px);
+  }
+
+  /* Bottom nav fixed */
+  .tt-bottomnav {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: calc(var(--tt-bottomnav-h) + env(safe-area-inset-bottom));
+    padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 8px;
+    border-top: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(12px);
+    z-index: 1000;
+  }
+
+  .tt-bottomnav-item {
+    border: none;
+    background: transparent;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    padding: 8px 6px;
+    border-radius: 14px;
+    color: rgba(15, 23, 42, 0.70);
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .tt-bottomnav-item span {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  .tt-bottomnav-item.is-active {
+    color: rgba(0, 132, 255, 0.95);
+    background: rgba(0, 132, 255, 0.10);
+  }
+
+  .tt-bottomnav-item.is-danger {
+    color: rgba(185, 28, 28, 0.95);
+  }
+
+  /* Keep top nav compact on mobile; actions can be hidden if cramped */
+  .tt-topnav-actions {
+    display: none;
+  }
+
+  /* Prevent iOS zoom on inputs */
+  input, textarea, select, button {
+    font-size: 16px;
+  }
+}
+
+
+/* DM page responsive shell */
+.tt-dm-shell { display: flex; height: 100%; min-height: 0; gap: 14px; }
+
+@media (max-width: 768px) {
+  .tt-dm-shell {
+    flex-direction: column;
+    height: calc(var(--tt-app-h) - var(--tt-topnav-h)); /* approx top nav */
+    gap: 10px;
+    padding-bottom: calc(10px + var(--tt-bottomnav-h) + env(safe-area-inset-bottom));
+  }
+}
+
+
+/* DM panes (Messenger-like) */
+.tt-dm-listPane{
+  width: 360px;
+  max-width: 100%;
+  min-width: 280px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.tt-dm-chatPane{
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mobile: each pane becomes full height; we render one at a time */
+@media (max-width: 768px){
+  .tt-dm-listPane,
+  .tt-dm-chatPane{
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+  }
+}
