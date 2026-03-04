@@ -1,6 +1,7 @@
 // client/src/pages/ChatPage.tsx
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import { socket as sharedSocket } from '../socket';
 import { createChannel, getChannels, getMessages, uploadAttachments } from '../api/http';
 import type { Channel, ChatMessageDTO, CurrentUserDTO, ReactionEmoji, MessageAttachmentDTO } from '../api/http';
 import { AvatarDot, AvatarStack, highlight } from '../ui/chatUi';
@@ -55,9 +56,6 @@ function lastSeenLabel(lastSeenMs: number) {
   return `last seen ${new Date(lastSeenMs).toLocaleDateString()}`;
 }
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ??
-  `http://${window.location.hostname}:4000`;
 
 function normalizeMentionKey(name: string) {
   return name.toLowerCase().replace(/\s+/g, '');
@@ -296,11 +294,11 @@ useEffect(() => {
   useEffect(() => {
     if (!token) return;
 
-    socketRef.current?.disconnect();
-
-    const socket = io(SOCKET_URL, { auth: { token } });
+    // Use shared singleton socket (prevents :4000 fallback + duplicate connections)
+    const socket: Socket = sharedSocket;
+    socket.auth = { token };
+    if (!socket.connected) socket.connect();
     socketRef.current = socket;
-
     socket.on('connect', () => console.log('[socket] connected', socket.id));
     socket.on('connect_error', (err) => console.error('[socket] connect_error', err.message));
     socket.on('message_error', (payload: any) => setError(payload?.error || 'Message error'));
@@ -366,7 +364,13 @@ useEffect(() => {
       socket.disconnect();
       socketRef.current = null;
     };
-  }, [token, currentUser.displayName]);
+      return () => {
+      socket.removeAllListeners();
+      socket.disconnect();
+      socketRef.current = null;
+    };
+
+}, [token, currentUser.displayName]);
 
   // Scroll tracking
   useEffect(() => {

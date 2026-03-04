@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { io, Socket } from 'socket.io-client';
+import type { Socket } from 'socket.io-client';
+import { socket as sharedSocket } from '../socket';
 import {
   DMMessageDTO,
   DMThreadDTO,
@@ -29,9 +30,6 @@ import {
 
 type Props = { currentUser: CurrentUserDTO };
 
-const SOCKET_URL =
-  import.meta.env.VITE_SOCKET_URL ??
-  `http://${window.location.hostname}:4000`;
 
 type Toast = { id: string; title: string; body: string; kind?: 'error' | 'success' };
 
@@ -473,7 +471,9 @@ const PrivateMessagesPage: React.FC<Props> = ({ currentUser }) => {
 
     socketRef.current?.disconnect();
 
-    const socket = io(SOCKET_URL, { auth: { token } });
+    const socket: Socket = sharedSocket;
+    socket.auth = { token };
+    if (!socket.connected) socket.connect();
     socketRef.current = socket;
 
     const handleDmMessage = (dto: DMMessageDTO) => {
