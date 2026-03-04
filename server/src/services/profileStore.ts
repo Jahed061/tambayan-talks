@@ -41,19 +41,19 @@ export async function ensureProfileTable() {
 
   // If the table/columns existed with INT/INTEGER types (older deployments),
 // upgrade them to BIGINT so millisecond timestamps don't overflow.
-const alterTypeStatements = [
-  `ALTER TABLE "UserProfile" ALTER COLUMN "lastSeenAtMs" TYPE BIGINT USING "lastSeenAtMs"::bigint;`,
-  `ALTER TABLE "UserProfile" ALTER COLUMN "lastSeenAt" TYPE BIGINT USING "lastSeenAt"::bigint;`,
-  `ALTER TABLE "UserProfile" ALTER COLUMN "updatedAtMs" TYPE BIGINT USING "updatedAtMs"::bigint;`,
-];
+  const alterTypeStatements = [
+    `ALTER TABLE "UserProfile" ALTER COLUMN "lastSeenAtMs" TYPE BIGINT USING "lastSeenAtMs"::bigint;`,
+    `ALTER TABLE "UserProfile" ALTER COLUMN "lastSeenAt" TYPE BIGINT USING "lastSeenAt"::bigint;`,
+    `ALTER TABLE "UserProfile" ALTER COLUMN "updatedAtMs" TYPE BIGINT USING "updatedAtMs"::bigint;`,
+  ];
 
-for (const stmt of alterTypeStatements) {
-  try {
-    await prisma.$executeRawUnsafe(stmt);
-  } catch {
+  for (const stmt of alterTypeStatements) {
+    try {
+      await prisma.$executeRawUnsafe(stmt);
+    } catch {
     // ignore (already BIGINT / column missing / etc.)
+    }
   }
-}
 
   for (const stmt of addColumnStatements) {
     try {
@@ -110,7 +110,7 @@ export async function setAvatarUrl(userId: string, avatarUrl: string | null): Pr
 
   await prisma.$executeRaw`
     INSERT INTO "UserProfile" ("userId", "avatarUrl", "updatedAtMs")
-    VALUES (${userId}, NULL, NULL, ${BigInt(now)})
+    VALUES (${userId}, ${avatarUrl}, ${BigInt(now)})
     ON CONFLICT("userId") DO UPDATE
       SET "avatarUrl" = EXCLUDED."avatarUrl",
           "updatedAtMs" = EXCLUDED."updatedAtMs";
@@ -126,7 +126,7 @@ export async function setLastSeenAtMs(userId: string, lastSeenAtMs: number | nul
     // Clear last-seen when the user comes back online.
     await prisma.$executeRaw`
       INSERT INTO "UserProfile" ("userId", "lastSeenAtMs", "lastSeenAt", "updatedAtMs")
-      VALUES (${userId}, NULL, NULL, ${now})
+      VALUES (${userId}, NULL, NULL, ${BigInt(now)})
       ON CONFLICT("userId") DO UPDATE
         SET "lastSeenAtMs" = NULL,
             "lastSeenAt" = NULL,
