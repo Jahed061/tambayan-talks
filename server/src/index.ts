@@ -47,8 +47,11 @@ import { sendDmMessage } from './data/dms';
 import { getMessageDtoById } from './data/messageDto';
 import { upsertChannelReceipt, upsertDmReceipt } from './data/receipts';
 import { ensureProfileTable, getAllLastSeenAtMsMap, setLastSeenAtMs } from './services/profileStore';
+import usersRouter from "./routes/users.routes";
 
 const app = express();
+
+app.use("/api/users", requireAuth, usersRouter);
 
 // CORS: allow the Vite dev server (5173) and mobile devices on LAN.
 // Also ensure preflight requests succeed (important for WebView + Authorization header).
