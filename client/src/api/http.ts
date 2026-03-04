@@ -40,6 +40,14 @@ export async function api<T>(path: string, options: RequestInit = {}): Promise<T
     headers: buildHeaders(options.headers),
   });
 
+  if (res.status === 401) {
+  // Token is missing/expired or user was deleted after DB reset
+    localStorage.removeItem('token');
+    authToken = null; // important: clear in-memory token too (you have authToken)
+    window.location.href = '/'; // or '/landing' if that's your login route
+    throw new Error('Unauthorized');
+  }
+
   if (!res.ok) {
     const text = await res.text().catch(() => '');
     throw new Error(text || `${res.status} ${res.statusText}`);
