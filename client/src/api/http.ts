@@ -1,5 +1,6 @@
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:4000`;
+  (import.meta.env.VITE_API_URL as string | undefined)?.trim() ||
+  window.location.origin;
 
 
 // Keep token in memory + storage (supports both localStorage and localStorage)

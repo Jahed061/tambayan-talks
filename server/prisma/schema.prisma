@@ -35,6 +35,7 @@ model Channel {
   createdAt   DateTime       @default(now())
   sessions    VideoSession[]
   messages    Message[]
+  isLocked Boolean @default(false)
 }
 
 model VideoSession {

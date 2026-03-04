@@ -642,6 +642,23 @@ io.on('connection', (socket) => {
         const userId = user.id || 'teacher-1';
         await ensureDemoUser(userId);
 
+        // --- Lock down the "activity" channel (no one can message it) ---
+        const ch = await prisma.channel.findUnique({
+          where: { id: channelId },
+          select: { name: true },
+        });
+
+        if (!ch) {
+          socket.emit('message_error', { error: 'Channel not found' });
+          return;
+        }
+
+        const role = String(user.role || '').toUpperCase(); 
+        if (ch.name === 'ACTIVITY' && !['TEACHER', 'ADMIN'].includes(role)) {
+          socket.emit('message_error', { error: 'The ACTIVITY channel is locked.' });
+          return;
+        }
+
         // validate reply target (must be in same channel)
         let safeReplyToId: string | null = null;
         if (replyToId) {
