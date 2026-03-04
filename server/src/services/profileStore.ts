@@ -39,6 +39,22 @@ export async function ensureProfileTable() {
     `ALTER TABLE "UserProfile" ADD COLUMN IF NOT EXISTS "updatedAtMs" BIGINT;`,
   ];
 
+  // If the table/columns existed with INT/INTEGER types (older deployments),
+// upgrade them to BIGINT so millisecond timestamps don't overflow.
+const alterTypeStatements = [
+  `ALTER TABLE "UserProfile" ALTER COLUMN "lastSeenAtMs" TYPE BIGINT USING "lastSeenAtMs"::bigint;`,
+  `ALTER TABLE "UserProfile" ALTER COLUMN "lastSeenAt" TYPE BIGINT USING "lastSeenAt"::bigint;`,
+  `ALTER TABLE "UserProfile" ALTER COLUMN "updatedAtMs" TYPE BIGINT USING "updatedAtMs"::bigint;`,
+];
+
+for (const stmt of alterTypeStatements) {
+  try {
+    await prisma.$executeRawUnsafe(stmt);
+  } catch {
+    // ignore (already BIGINT / column missing / etc.)
+  }
+}
+
   for (const stmt of addColumnStatements) {
     try {
       await prisma.$executeRawUnsafe(stmt);
@@ -94,7 +110,7 @@ export async function setAvatarUrl(userId: string, avatarUrl: string | null): Pr
 
   await prisma.$executeRaw`
     INSERT INTO "UserProfile" ("userId", "avatarUrl", "updatedAtMs")
-    VALUES (${userId}, ${avatarUrl}, ${now})
+    VALUES (${userId}, NULL, NULL, ${BigInt(now)})
     ON CONFLICT("userId") DO UPDATE
       SET "avatarUrl" = EXCLUDED."avatarUrl",
           "updatedAtMs" = EXCLUDED."updatedAtMs";
@@ -122,7 +138,7 @@ export async function setLastSeenAtMs(userId: string, lastSeenAtMs: number | nul
   // Write both columns to be backward compatible with any older code expecting "lastSeenAt".
   await prisma.$executeRaw`
     INSERT INTO "UserProfile" ("userId", "lastSeenAtMs", "lastSeenAt", "updatedAtMs")
-    VALUES (${userId}, ${BigInt(lastSeenAtMs)}, ${BigInt(lastSeenAtMs)}, ${now})
+    VALUES (${userId}, ${BigInt(lastSeenAtMs)}, ${BigInt(lastSeenAtMs)}, ${BigInt(now)})
     ON CONFLICT("userId") DO UPDATE
       SET "lastSeenAtMs" = EXCLUDED."lastSeenAtMs",
           "lastSeenAt" = EXCLUDED."lastSeenAt",
