@@ -15,7 +15,7 @@ router.get('/search', async (req, res) => {
   try {
     const currentUserId = getAuthedUserId(req);
     if (!currentUserId) return res.status(401).json({ error: 'Not authenticated' });
-
+ 
     const qRaw = String(req.query.q ?? '').trim();
     const q = qRaw.toLowerCase();
 

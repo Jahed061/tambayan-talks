@@ -78,5 +78,5 @@ router.put('/', async (req, res) => {
   const newAvatarUrl = await getAvatarUrl(userId);
   return res.json({ ...user, avatarUrl: newAvatarUrl });
 });
-
+ 
 export default router;

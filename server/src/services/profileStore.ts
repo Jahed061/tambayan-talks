@@ -117,7 +117,7 @@ export async function setLastSeenAtMs(userId: string, lastSeenAtMs: number | nul
             "updatedAtMs" = EXCLUDED."updatedAtMs";
     `;
     return;
-  }
+  } 
 
   // Write both columns to be backward compatible with any older code expecting "lastSeenAt".
   await prisma.$executeRaw`

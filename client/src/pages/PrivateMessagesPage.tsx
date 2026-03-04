@@ -15,7 +15,7 @@ import {
   MessageAttachmentDTO,
   CurrentUserDTO,
   api,
-} from '../api/http';
+} from '../api/http'; 
 
 import LinkPreview from '../ui/LinkPreview';
 import { AvatarDot, AvatarStack } from '../ui/chatUi';

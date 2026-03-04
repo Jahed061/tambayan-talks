@@ -200,4 +200,4 @@ export async function getMessageDtoById(messageId: string, currentUserId: string
   ].filter(Boolean) as string[];
   const avatarMap = await getAvatarUrlMap(ids);
   return buildMessageDto(message as unknown as MessageWithRelations, currentUserId, avatarMap);
-}
+} 

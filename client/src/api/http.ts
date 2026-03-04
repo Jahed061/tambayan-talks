@@ -7,7 +7,7 @@ let authToken: string | null =
   localStorage.getItem('token') ?? null;
 
 export function setToken(token: string | null) {
-  authToken = token;
+  authToken = token; 
 
   if (token) {
     localStorage.setItem('token', token);

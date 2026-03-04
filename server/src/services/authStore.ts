@@ -16,7 +16,7 @@ export async function ensureAuthTables() {
       "emailVerified" INTEGER NOT NULL DEFAULT 0
     );
   `);
-
+ 
   await prisma.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS "AuthToken" (
       "id" TEXT NOT NULL PRIMARY KEY,
