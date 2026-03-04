@@ -51,8 +51,6 @@ import usersRouter from "./routes/users.routes";
 
 const app = express();
 
-app.options("*", cors());
-
 const FRONTEND_ORIGIN =
   process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
 
