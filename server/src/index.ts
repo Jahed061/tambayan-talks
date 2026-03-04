@@ -571,9 +571,9 @@ io.on('connection', (socket) => {
   socket.on(
     'send_dm',
     async (payload: {
-      threadId: string;
-      content?: string;
-      attachments?: Array<{
+        otherUserId: string;
+        content?: string;
+        attachments?: Array<{
         kind: 'IMAGE' | 'PDF' | 'AUDIO';
         url: string;
         mimeType: string;
@@ -583,13 +583,39 @@ io.on('connection', (socket) => {
         height?: number | null;
         durationMs?: number | null;
       }>;
+      replyToId?: string | null;
     }) => {
-      const { threadId, content, attachments } = payload;
+      const { otherUserId, content, attachments, replyToId } = payload;
+
       const senderId = (socket.data as any).user?.id;
       if (!senderId) {
         socket.emit('dm_error', { error: 'Missing token' });
         return;
       }
+
+      if (!otherUserId) {
+        socket.emit('dm_error', { error: 'Missing recipient' });
+        return;
+      }
+
+      let thread = await prisma.dMThread.findFirst({
+        where: {
+        OR: [
+          { userAId: senderId, userBId: otherUserId },
+          { userAId: otherUserId, userBId: senderId },
+      ],
+    },
+        select: { id: true },
+    });
+
+    if (!thread) {
+  thread = await prisma.dMThread.create({
+    data: { userAId: senderId, userBId: otherUserId },
+    select: { id: true },
+  });
+}
+
+  const threadId = thread.id;
 
       const exists = await prisma.user.findUnique({ where: { id: senderId } });
       if (!exists) {
@@ -598,8 +624,8 @@ io.on('connection', (socket) => {
       }
 
       try {
-        const message = await sendDmMessage(senderId, threadId, String(content ?? ''), attachments);
-
+        const message = await sendDmMessage(senderId, thread.id, String(content ?? ''), attachments,
+    );
         io.to(`dm:${threadId}`).emit('dm_message', {
           id: message.id,
           content: message.content,
