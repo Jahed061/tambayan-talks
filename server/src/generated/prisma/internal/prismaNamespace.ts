@@ -1211,7 +1211,8 @@ export const ChannelScalarFieldEnum = {
   description: 'description',
   isPrivate: 'isPrivate',
   ownerId: 'ownerId',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  isLocked: 'isLocked'
 } as const
 
 export type ChannelScalarFieldEnum = (typeof ChannelScalarFieldEnum)[keyof typeof ChannelScalarFieldEnum]

@@ -31,6 +31,7 @@ export type ChannelMinAggregateOutputType = {
   isPrivate: boolean | null
   ownerId: string | null
   createdAt: Date | null
+  isLocked: boolean | null
 }
 
 export type ChannelMaxAggregateOutputType = {
@@ -40,6 +41,7 @@ export type ChannelMaxAggregateOutputType = {
   isPrivate: boolean | null
   ownerId: string | null
   createdAt: Date | null
+  isLocked: boolean | null
 }
 
 export type ChannelCountAggregateOutputType = {
@@ -49,6 +51,7 @@ export type ChannelCountAggregateOutputType = {
   isPrivate: number
   ownerId: number
   createdAt: number
+  isLocked: number
   _all: number
 }
 
@@ -60,6 +63,7 @@ export type ChannelMinAggregateInputType = {
   isPrivate?: true
   ownerId?: true
   createdAt?: true
+  isLocked?: true
 }
 
 export type ChannelMaxAggregateInputType = {
@@ -69,6 +73,7 @@ export type ChannelMaxAggregateInputType = {
   isPrivate?: true
   ownerId?: true
   createdAt?: true
+  isLocked?: true
 }
 
 export type ChannelCountAggregateInputType = {
@@ -78,6 +83,7 @@ export type ChannelCountAggregateInputType = {
   isPrivate?: true
   ownerId?: true
   createdAt?: true
+  isLocked?: true
   _all?: true
 }
 
@@ -160,6 +166,7 @@ export type ChannelGroupByOutputType = {
   isPrivate: boolean
   ownerId: string
   createdAt: Date
+  isLocked: boolean
   _count: ChannelCountAggregateOutputType | null
   _min: ChannelMinAggregateOutputType | null
   _max: ChannelMaxAggregateOutputType | null
@@ -190,6 +197,7 @@ export type ChannelWhereInput = {
   isPrivate?: Prisma.BoolFilter<"Channel"> | boolean
   ownerId?: Prisma.StringFilter<"Channel"> | string
   createdAt?: Prisma.DateTimeFilter<"Channel"> | Date | string
+  isLocked?: Prisma.BoolFilter<"Channel"> | boolean
   sessions?: Prisma.VideoSessionListRelationFilter
   messages?: Prisma.MessageListRelationFilter
 }
@@ -201,6 +209,7 @@ export type ChannelOrderByWithRelationInput = {
   isPrivate?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isLocked?: Prisma.SortOrder
   sessions?: Prisma.VideoSessionOrderByRelationAggregateInput
   messages?: Prisma.MessageOrderByRelationAggregateInput
 }
@@ -215,6 +224,7 @@ export type ChannelWhereUniqueInput = Prisma.AtLeast<{
   isPrivate?: Prisma.BoolFilter<"Channel"> | boolean
   ownerId?: Prisma.StringFilter<"Channel"> | string
   createdAt?: Prisma.DateTimeFilter<"Channel"> | Date | string
+  isLocked?: Prisma.BoolFilter<"Channel"> | boolean
   sessions?: Prisma.VideoSessionListRelationFilter
   messages?: Prisma.MessageListRelationFilter
 }, "id">
@@ -226,6 +236,7 @@ export type ChannelOrderByWithAggregationInput = {
   isPrivate?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isLocked?: Prisma.SortOrder
   _count?: Prisma.ChannelCountOrderByAggregateInput
   _max?: Prisma.ChannelMaxOrderByAggregateInput
   _min?: Prisma.ChannelMinOrderByAggregateInput
@@ -241,6 +252,7 @@ export type ChannelScalarWhereWithAggregatesInput = {
   isPrivate?: Prisma.BoolWithAggregatesFilter<"Channel"> | boolean
   ownerId?: Prisma.StringWithAggregatesFilter<"Channel"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Channel"> | Date | string
+  isLocked?: Prisma.BoolWithAggregatesFilter<"Channel"> | boolean
 }
 
 export type ChannelCreateInput = {
@@ -250,6 +262,7 @@ export type ChannelCreateInput = {
   isPrivate?: boolean
   ownerId: string
   createdAt?: Date | string
+  isLocked?: boolean
   sessions?: Prisma.VideoSessionCreateNestedManyWithoutChannelInput
   messages?: Prisma.MessageCreateNestedManyWithoutChannelInput
 }
@@ -261,6 +274,7 @@ export type ChannelUncheckedCreateInput = {
   isPrivate?: boolean
   ownerId: string
   createdAt?: Date | string
+  isLocked?: boolean
   sessions?: Prisma.VideoSessionUncheckedCreateNestedManyWithoutChannelInput
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChannelInput
 }
@@ -272,6 +286,7 @@ export type ChannelUpdateInput = {
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.VideoSessionUpdateManyWithoutChannelNestedInput
   messages?: Prisma.MessageUpdateManyWithoutChannelNestedInput
 }
@@ -283,6 +298,7 @@ export type ChannelUncheckedUpdateInput = {
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.VideoSessionUncheckedUpdateManyWithoutChannelNestedInput
   messages?: Prisma.MessageUncheckedUpdateManyWithoutChannelNestedInput
 }
@@ -294,6 +310,7 @@ export type ChannelCreateManyInput = {
   isPrivate?: boolean
   ownerId: string
   createdAt?: Date | string
+  isLocked?: boolean
 }
 
 export type ChannelUpdateManyMutationInput = {
@@ -303,6 +320,7 @@ export type ChannelUpdateManyMutationInput = {
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ChannelUncheckedUpdateManyInput = {
@@ -312,6 +330,7 @@ export type ChannelUncheckedUpdateManyInput = {
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type ChannelCountOrderByAggregateInput = {
@@ -321,6 +340,7 @@ export type ChannelCountOrderByAggregateInput = {
   isPrivate?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isLocked?: Prisma.SortOrder
 }
 
 export type ChannelMaxOrderByAggregateInput = {
@@ -330,6 +350,7 @@ export type ChannelMaxOrderByAggregateInput = {
   isPrivate?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isLocked?: Prisma.SortOrder
 }
 
 export type ChannelMinOrderByAggregateInput = {
@@ -339,6 +360,7 @@ export type ChannelMinOrderByAggregateInput = {
   isPrivate?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  isLocked?: Prisma.SortOrder
 }
 
 export type ChannelNullableScalarRelationFilter = {
@@ -396,6 +418,7 @@ export type ChannelCreateWithoutSessionsInput = {
   isPrivate?: boolean
   ownerId: string
   createdAt?: Date | string
+  isLocked?: boolean
   messages?: Prisma.MessageCreateNestedManyWithoutChannelInput
 }
 
@@ -406,6 +429,7 @@ export type ChannelUncheckedCreateWithoutSessionsInput = {
   isPrivate?: boolean
   ownerId: string
   createdAt?: Date | string
+  isLocked?: boolean
   messages?: Prisma.MessageUncheckedCreateNestedManyWithoutChannelInput
 }
 
@@ -432,6 +456,7 @@ export type ChannelUpdateWithoutSessionsInput = {
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   messages?: Prisma.MessageUpdateManyWithoutChannelNestedInput
 }
 
@@ -442,6 +467,7 @@ export type ChannelUncheckedUpdateWithoutSessionsInput = {
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   messages?: Prisma.MessageUncheckedUpdateManyWithoutChannelNestedInput
 }
 
@@ -452,6 +478,7 @@ export type ChannelCreateWithoutMessagesInput = {
   isPrivate?: boolean
   ownerId: string
   createdAt?: Date | string
+  isLocked?: boolean
   sessions?: Prisma.VideoSessionCreateNestedManyWithoutChannelInput
 }
 
@@ -462,6 +489,7 @@ export type ChannelUncheckedCreateWithoutMessagesInput = {
   isPrivate?: boolean
   ownerId: string
   createdAt?: Date | string
+  isLocked?: boolean
   sessions?: Prisma.VideoSessionUncheckedCreateNestedManyWithoutChannelInput
 }
 
@@ -488,6 +516,7 @@ export type ChannelUpdateWithoutMessagesInput = {
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.VideoSessionUpdateManyWithoutChannelNestedInput
 }
 
@@ -498,6 +527,7 @@ export type ChannelUncheckedUpdateWithoutMessagesInput = {
   isPrivate?: Prisma.BoolFieldUpdateOperationsInput | boolean
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  isLocked?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sessions?: Prisma.VideoSessionUncheckedUpdateManyWithoutChannelNestedInput
 }
 
@@ -548,6 +578,7 @@ export type ChannelSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   isPrivate?: boolean
   ownerId?: boolean
   createdAt?: boolean
+  isLocked?: boolean
   sessions?: boolean | Prisma.Channel$sessionsArgs<ExtArgs>
   messages?: boolean | Prisma.Channel$messagesArgs<ExtArgs>
   _count?: boolean | Prisma.ChannelCountOutputTypeDefaultArgs<ExtArgs>
@@ -560,6 +591,7 @@ export type ChannelSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   isPrivate?: boolean
   ownerId?: boolean
   createdAt?: boolean
+  isLocked?: boolean
 }, ExtArgs["result"]["channel"]>
 
 export type ChannelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -569,6 +601,7 @@ export type ChannelSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   isPrivate?: boolean
   ownerId?: boolean
   createdAt?: boolean
+  isLocked?: boolean
 }, ExtArgs["result"]["channel"]>
 
 export type ChannelSelectScalar = {
@@ -578,9 +611,10 @@ export type ChannelSelectScalar = {
   isPrivate?: boolean
   ownerId?: boolean
   createdAt?: boolean
+  isLocked?: boolean
 }
 
-export type ChannelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "isPrivate" | "ownerId" | "createdAt", ExtArgs["result"]["channel"]>
+export type ChannelOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "isPrivate" | "ownerId" | "createdAt" | "isLocked", ExtArgs["result"]["channel"]>
 export type ChannelInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sessions?: boolean | Prisma.Channel$sessionsArgs<ExtArgs>
   messages?: boolean | Prisma.Channel$messagesArgs<ExtArgs>
@@ -602,6 +636,7 @@ export type $ChannelPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     isPrivate: boolean
     ownerId: string
     createdAt: Date
+    isLocked: boolean
   }, ExtArgs["result"]["channel"]>
   composites: {}
 }
@@ -1033,6 +1068,7 @@ export interface ChannelFieldRefs {
   readonly isPrivate: Prisma.FieldRef<"Channel", 'Boolean'>
   readonly ownerId: Prisma.FieldRef<"Channel", 'String'>
   readonly createdAt: Prisma.FieldRef<"Channel", 'DateTime'>
+  readonly isLocked: Prisma.FieldRef<"Channel", 'Boolean'>
 }
     
 
