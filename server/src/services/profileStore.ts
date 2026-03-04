@@ -23,6 +23,11 @@ export async function ensureProfileTable() {
     `,
   );
 
+  // Ensure columns exist for existing installations (older tables may miss these).
+  await prisma.$executeRaw(
+    Prisma.sql`ALTER TABLE ${Prisma.raw(TABLE)} ADD COLUMN IF NOT EXISTS "lastSeenAt" BIGINT`,
+  );
+
   // Some older builds also reference an email column.
   await prisma.$executeRaw(
     Prisma.sql`ALTER TABLE ${Prisma.raw(TABLE)} ADD COLUMN IF NOT EXISTS "email" TEXT`,

@@ -54,10 +54,7 @@ const app = express();
 const FRONTEND_ORIGIN =
   process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
 
-app.use("/api/users", usersRouter);
-
-// CORS: allow the Vite dev server (5173) and mobile devices on LAN.
-// Also ensure preflight requests succeed (important for WebView + Authorization header).
+// CORS for REST endpoints (important for Authorization header + browser preflight).
 app.use(
   cors({
     origin: FRONTEND_ORIGIN,
@@ -66,7 +63,7 @@ app.use(
   })
 );
 
-// Handle browser preflight requests BEFORE auth middleware
+// Always allow preflight requests to succeed (do NOT require auth for OPTIONS).
 app.options(/.*/, cors());
 
 app.use(express.json());
@@ -93,6 +90,7 @@ app.use('/api/uploads', requireAuth, uploadsRouter);
 app.use('/api/dms', requireAuth, dmsRouter);
 app.use('/api/video-sessions', requireAuth, videoSessionsRouter);
 app.use('/api/channels', requireAuth, channelsRouter);
+app.use('/api/users', usersRouter);
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
