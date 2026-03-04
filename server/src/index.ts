@@ -19,8 +19,6 @@ import { prisma } from './prisma/client';
 
 const DEFAULT_PUBLIC_CHANNEL_ID = 'public';
 const DEFAULT_PUBLIC_CHANNEL_NAME = 'general';
-const FRONTEND_ORIGIN =
-  process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
 
 async function ensureDefaultPublicChannel() {
   // Create a stable public channel for all testers.
@@ -55,6 +53,9 @@ const app = express();
 
 app.options("*", cors());
 
+const FRONTEND_ORIGIN =
+  process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
+  
 app.use("/api/users", usersRouter);
 
 // CORS: allow the Vite dev server (5173) and mobile devices on LAN.
