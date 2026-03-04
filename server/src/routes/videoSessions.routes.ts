@@ -8,9 +8,9 @@ router.post('/', async (req, res) => {
   try {
     const user = (req as any).user;
 
-    // Basic auth check
-    if (!user || user.role !== 'TEACHER') {
-      return res.status(403).json({ error: 'Only teachers can create sessions' });
+    // Basic auth check (allow any logged-in user, including STUDENT)
+    if (!user) {
+      return res.status(401).json({ error: 'Unauthorized' });
     }
 
     const { title, description, channelId, startTime, endTime } = req.body;
@@ -27,23 +27,14 @@ router.post('/', async (req, res) => {
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return res.status(400).json({ error: 'Invalid start or end time' });
     }
+    
+    // Make sure the user exists in DB (no fake user creation)
+      const teacherId = String(user.id);
 
-    // 🔹 make sure the teacher exists in the DB
-    const teacherId = String(user.id);
-
-    const teacher = await prisma.user.upsert({
-      where: { id: teacherId },
-      update: {},
-      create: {
-        id: teacherId,
-        email: `${teacherId}@example.com`,
-        password: 'demo-password',
-        displayName: 'Demo Teacher',
-        role: 'TEACHER',
-      },
-    });
-
-    console.log('Using teacher:', teacher.id);
+    const existing = await prisma.user.findUnique({ where: { id: teacherId } });
+      if (!existing) {
+        return res.status(401).json({ error: 'Unauthorized' });
+    }
 
     const randomSlug = Math.random().toString(36).slice(2, 8);
     const videoLink = `https://meet.jit.si/tambayan-${randomSlug}`;
@@ -55,7 +46,7 @@ router.post('/', async (req, res) => {
         startTime: start,
         endTime: end,
         videoLink,
-        teacherId: teacher.id,        // ✅ definitely exists now
+        teacherId: teacherId,        // ✅ definitely exists now
         channelId: channelId || null, // nullable FK is okay
       },
     });

@@ -190,13 +190,6 @@ function App() {
 
   const displayRole = useMemo(() => (currentUser?.role ? String(currentUser.role).toUpperCase() : ''), [currentUser?.role]);
 
-  const canSeeSessions = currentUser?.role === 'TEACHER' || currentUser?.role === 'ADMIN';
-  useEffect(() => {
-    if (!canSeeSessions && view === 'sessions') setView('dm');
-  }, [canSeeSessions, view]);
-
-
-
   if (loadingMe) {
     return <div style={{ padding: 16 }}>Loading...</div>;
   }
@@ -324,19 +317,17 @@ function App() {
           <span>Channels</span>
         </button>
 
-        {canSeeSessions && (
-          <button
-            type="button"
-            className={'tt-bottomnav-item ' + (view === 'sessions' ? 'is-active' : '')}
-            onClick={() => setView('sessions')}
-            aria-label="Sessions"
-            title="Sessions"
-          >
-            <Icon name="sessions" />
-            <span>Sessions</span>
-          </button>
-        )}
-
+        <button
+          type="button"
+          className={'tt-bottomnav-item ' + (view === 'sessions' ? 'is-active' : '')}
+          onClick={() => setView('sessions')}
+          aria-label="Sessions"
+          title="Sessions"
+        >
+          <Icon name="sessions" />
+          <span>Sessions</span>
+        </button>
+        
         <button
           type="button"
           className={'tt-bottomnav-item ' + (view === 'profile' ? 'is-active' : '')}
