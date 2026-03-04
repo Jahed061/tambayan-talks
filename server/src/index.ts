@@ -19,6 +19,8 @@ import { prisma } from './prisma/client';
 
 const DEFAULT_PUBLIC_CHANNEL_ID = 'public';
 const DEFAULT_PUBLIC_CHANNEL_NAME = 'general';
+const FRONTEND_ORIGIN =
+  process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
 
 async function ensureDefaultPublicChannel() {
   // Create a stable public channel for all testers.
@@ -51,38 +53,22 @@ import usersRouter from "./routes/users.routes";
 
 const app = express();
 
-app.use("/api/users", requireAuth, usersRouter);
+app.options("*", cors());
+
+app.use("/api/users", usersRouter);
 
 // CORS: allow the Vite dev server (5173) and mobile devices on LAN.
 // Also ensure preflight requests succeed (important for WebView + Authorization header).
 app.use(
   cors({
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
-  }),
+    origin: FRONTEND_ORIGIN,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
 );
 
-// Handle preflight early for every route
-// Handle preflight early for every route (Express v5/router doesn't accept '*' path)
-app.options(
-  /.*/,
-  cors({
-    origin: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
-  }),
-);
-//app.use(
-  //cors({
-    //origin: 'http://localhost:5173',
-    //methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    //allowedHeaders: ['Content-Type', 'Authorization'],
-    //credentials: false,
-  //})
-//);
+// Handle browser preflight requests BEFORE auth middleware
+app.options("*", cors());
 
 app.use(express.json());
 
@@ -112,12 +98,10 @@ app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
 
-const io = new SocketIOServer(server, {
-  cors: {
-    origin: true,
-    methods: ['GET', 'POST'],
-  },
+const io = new SocketIOServer (server, {
+  cors: { origin: FRONTEND_ORIGIN, methods: ["GET", "POST"], },
 });
+
 
 // ---------------- Presence (online/offline) ----------------
 // userId -> set of socket ids (multiple tabs/devices)
