@@ -55,7 +55,7 @@ app.options("*", cors());
 
 const FRONTEND_ORIGIN =
   process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
-  
+
 app.use("/api/users", usersRouter);
 
 // CORS: allow the Vite dev server (5173) and mobile devices on LAN.
@@ -69,7 +69,7 @@ app.use(
 );
 
 // Handle browser preflight requests BEFORE auth middleware
-app.options("*", cors());
+app.options(/.*/, cors());
 
 app.use(express.json());
 
