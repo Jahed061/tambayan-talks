@@ -857,15 +857,23 @@ const PrivateMessagesPage: React.FC<Props> = ({ currentUser }) => {
 
     const socket = socketRef.current;
     const replyToId = replyingTo?.id ?? null;
+    const activeThread = threads.find((t) => t.id === activeThreadId);
+    const otherUserId = activeThread?.otherUser?.id;
 
     try {
+
+      if (!otherUserId) {
+        setError('No recipient selected');
+        return;
+      }
+
       if (socket && socket.connected) {
         socket.emit('send_dm', {
-          threadId: activeThreadId,
-          content: text,
-          attachments: attachmentsWithDur,
-          replyToId,
-        });
+        otherUserId,
+        content: text,
+        attachments: attachmentsWithDur,
+        replyToId,
+      });
         clearPendingUploads();
         setReplyingTo(null);
         stopTypingNow();
