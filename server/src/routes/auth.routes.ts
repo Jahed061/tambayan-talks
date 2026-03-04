@@ -269,7 +269,7 @@ router.post('/verify-email/resend', async (req, res) => {
     expiresAtMs,
   });
 
-  const verifyUrl = `${appBaseUrl()}/#verify-email?token=${encodeURIComponent(token)}`;
+  const verifyUrl = `${appBaseUrl(req)}/#verify-email?token=${encodeURIComponent(token)}`;
 
   await sendMail({
     to: user.email,
@@ -301,7 +301,7 @@ router.post('/forgot-password', async (req, res) => {
     expiresAtMs,
   });
 
-  const resetUrl = `${appBaseUrl()}/#reset-password?token=${encodeURIComponent(token)}`;
+  const resetUrl = `${appBaseUrl(req)}/#reset-password?token=${encodeURIComponent(token)}`;
 
   await sendMail({
     to: user.email,
@@ -381,7 +381,7 @@ router.post('/admin/create-teacher', requireAuth, requireRole('ADMIN'), async (r
         expiresAtMs,
       });
 
-      const verifyUrl = `${appBaseUrl()}/#verify-email?token=${encodeURIComponent(token)}`;
+      const verifyUrl = `${appBaseUrl(req)}/#verify-email?token=${encodeURIComponent(token)}`;
 
       await sendMail({
         to: user.email,
