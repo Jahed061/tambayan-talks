@@ -1,12 +1,10 @@
-import { Router, type Request } from 'express';
+import { Router, type Request, type Express } from 'express';
 import multer from 'multer';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 
 // Uploads are stored on disk (server/uploads). The files are served at /uploads/<name>.
-
-import type { File as MulterFile } from "multer";
 
 export type UploadedAttachmentDTO = {
   kind: 'IMAGE' | 'PDF' | 'AUDIO';
@@ -22,9 +20,9 @@ const uploadsDir = path.resolve(process.cwd(), 'uploads');
 fs.mkdirSync(uploadsDir, { recursive: true });
 
 const storage = multer.diskStorage({
-  destination: (_req: Request, _file: MulterFile, cb: (error: Error | null, destination: string) => void) =>
+  destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) =>
     cb(null, uploadsDir),
-  filename: (_req: Request, file: MulterFile, cb: (error: Error | null, filename: string) => void) => {
+  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
     const ext = path.extname(file.originalname || '').toLowerCase();
     const safeExt = ext && ext.length <= 10 ? ext : '';
     const id = crypto.randomBytes(16).toString('hex');
@@ -38,7 +36,7 @@ const MAX_FILES_PER_REQUEST = 8;
 const upload = multer({
   storage,
   limits: { fileSize: MAX_FILE_BYTES, files: MAX_FILES_PER_REQUEST },
-  fileFilter: (_req: Request, file: MulterFile, cb: multer.FileFilterCallback) => {
+  fileFilter: (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     const mime = String(file.mimetype || '').toLowerCase();
 
     const okImage = mime.startsWith('image/');
@@ -59,7 +57,7 @@ function kindFromMime(mimeType: string): UploadedAttachmentDTO['kind'] {
 
 // POST /api/uploads  (multipart/form-data; field name: "files")
 router.post('/', upload.array('files', MAX_FILES_PER_REQUEST), (req, res) => {
-  const files = (((req as any).files as MulterFile[]) ?? []) as MulterFile[];
+  const files = (((req as any).files as Express.Multer.File[]) ?? []) as Express.Multer.File[];
 
   const out: UploadedAttachmentDTO[] = files.map((f) => ({
     kind: kindFromMime(f.mimetype),
