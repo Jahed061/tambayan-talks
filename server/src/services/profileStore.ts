@@ -1,135 +1,150 @@
-import { Prisma } from '../generated/prisma/client';
 import prisma from '../prisma/client';
 
+let ensured = false;
+
 /**
- * Profile metadata storage.
+ * Stores optional profile fields without requiring Prisma schema changes.
  *
- * The codebase previously used SQLite-style `?` placeholders with `$queryRawUnsafe`.
- * That breaks on Postgres (Render).
+ * Table: "UserProfile"
+ *  - userId (PK)
+ *  - avatarUrl (nullable)
+ *  - lastSeenAtMs (nullable)   // preferred column name
+ *  - lastSeenAt (nullable)     // backward-compat column name (older code/logs)
+ *  - updatedAtMs (not null)
  *
- * ✅ Fix: use Prisma's `$queryRaw` / `$executeRaw` tagged templates (provider-safe).
+ * IMPORTANT:
+ * - Render uses Postgres. Prisma raw queries must not use "?" placeholders.
+ * - This module uses parameterized tagged templates for portability and safety.
  */
-
-const TABLE = '"UserProfile"';
-
 export async function ensureProfileTable() {
-  await prisma.$executeRaw(
-    Prisma.sql`
-      CREATE TABLE IF NOT EXISTS ${Prisma.raw(TABLE)} (
-        "userId" TEXT PRIMARY KEY,
-        "avatarUrl" TEXT,
-        "lastSeenAt" BIGINT
-      )
-    `,
-  );
+  if (ensured) return;
 
-  // Ensure columns exist for existing installations (older tables may miss these).
-  await prisma.$executeRaw(
-    Prisma.sql`ALTER TABLE ${Prisma.raw(TABLE)} ADD COLUMN IF NOT EXISTS "lastSeenAt" BIGINT`,
-  );
+  // Create table (safe if it already exists).
+  await prisma.$executeRawUnsafe(`
+    CREATE TABLE IF NOT EXISTS "UserProfile" (
+      "userId" TEXT NOT NULL PRIMARY KEY,
+      "avatarUrl" TEXT,
+      "lastSeenAtMs" BIGINT,
+      "lastSeenAt" BIGINT,
+      "updatedAtMs" BIGINT NOT NULL
+    );
+  `);
 
-  // Some older builds also reference an email column.
-  await prisma.$executeRaw(
-    Prisma.sql`ALTER TABLE ${Prisma.raw(TABLE)} ADD COLUMN IF NOT EXISTS "email" TEXT`,
-  );
+  // Ensure columns exist for older DBs created with fewer columns.
+  // Postgres supports IF NOT EXISTS for ADD COLUMN; wrap for safety across engines.
+  const addColumnStatements = [
+    `ALTER TABLE "UserProfile" ADD COLUMN IF NOT EXISTS "avatarUrl" TEXT;`,
+    `ALTER TABLE "UserProfile" ADD COLUMN IF NOT EXISTS "lastSeenAtMs" BIGINT;`,
+    `ALTER TABLE "UserProfile" ADD COLUMN IF NOT EXISTS "lastSeenAt" BIGINT;`,
+    `ALTER TABLE "UserProfile" ADD COLUMN IF NOT EXISTS "updatedAtMs" BIGINT;`,
+  ];
+
+  for (const stmt of addColumnStatements) {
+    try {
+      await prisma.$executeRawUnsafe(stmt);
+    } catch {
+      // ignore (e.g., some engines don't support IF NOT EXISTS)
+      try {
+        // Fallback without IF NOT EXISTS.
+        const fallback = stmt.replace(' IF NOT EXISTS', '');
+        await prisma.$executeRawUnsafe(fallback);
+      } catch {
+        // ignore
+      }
+    }
+  }
+
+  ensured = true;
 }
 
 export async function getAvatarUrl(userId: string): Promise<string | null> {
   await ensureProfileTable();
 
-  const rows = await prisma.$queryRaw<{ avatarUrl: string | null }[]>(
-    Prisma.sql`
-      SELECT "avatarUrl"
-      FROM ${Prisma.raw(TABLE)}
-      WHERE "userId" = ${userId}
-      LIMIT 1
-    `,
-  );
+  const rows = await prisma.$queryRaw<Array<{ avatarUrl: string | null }>>`
+    SELECT "avatarUrl" AS "avatarUrl"
+    FROM "UserProfile"
+    WHERE "userId" = ${userId}
+    LIMIT 1;
+  `;
 
-  return rows[0]?.avatarUrl ?? null;
+  if (!rows.length) return null;
+  return rows[0].avatarUrl ?? null;
 }
 
-export async function setAvatarUrl(userId: string, avatarUrl: string | null) {
+export async function getAvatarUrlMap(userIds: string[]): Promise<Record<string, string | null>> {
   await ensureProfileTable();
 
-  await prisma.$executeRaw(
-    Prisma.sql`
-      INSERT INTO ${Prisma.raw(TABLE)} ("userId", "avatarUrl")
-      VALUES (${userId}, ${avatarUrl})
-      ON CONFLICT ("userId") DO UPDATE
-      SET "avatarUrl" = EXCLUDED."avatarUrl"
-    `,
-  );
-}
-
-export async function setLastSeenAtMs(userId: string, lastSeenAt: number | null) {
-  await ensureProfileTable();
-
-  const lastSeenAtBig = lastSeenAt === null ? null : BigInt(lastSeenAt);
-
-  await prisma.$executeRaw(
-    Prisma.sql`
-      INSERT INTO ${Prisma.raw(TABLE)} ("userId", "lastSeenAt")
-      VALUES (${userId}, ${lastSeenAtBig})
-      ON CONFLICT ("userId") DO UPDATE
-      SET "lastSeenAt" = EXCLUDED."lastSeenAt"
-    `,
-  );
-}
-
-export async function getLastSeenAtMs(userId: string): Promise<number | null> {
-  await ensureProfileTable();
-
-  const rows = await prisma.$queryRaw<{ lastSeenAt: bigint | number | null }[]>(
-    Prisma.sql`
-      SELECT "lastSeenAt"
-      FROM ${Prisma.raw(TABLE)}
-      WHERE "userId" = ${userId}
-      LIMIT 1
-    `,
-  );
-
-  const v = rows[0]?.lastSeenAt;
-  if (v === null || v === undefined) return null;
-  return typeof v === 'bigint' ? Number(v) : v;
-}
-
-export async function getAllLastSeenAtMsMap(userIds: string[] = []) {
-  await ensureProfileTable();
-  const map = new Map<string, number>();
+  const map: Record<string, string | null> = {};
   if (!userIds.length) return map;
 
-  const rows = await prisma.$queryRaw<{ userId: string; lastSeenAt: bigint | number | null }[]>(
-    Prisma.sql`
-      SELECT "userId", "lastSeenAt"
-      FROM ${Prisma.raw(TABLE)}
-      WHERE "userId" IN (${Prisma.join(userIds)})
-    `,
-  );
+  const rows = await prisma.$queryRaw<Array<{ userId: string; avatarUrl: string | null }>>`
+    SELECT "userId" AS "userId", "avatarUrl" AS "avatarUrl"
+    FROM "UserProfile"
+    WHERE "userId" = ANY(${userIds}::text[]);
+  `;
 
-  for (const r of rows) {
-    const v = r.lastSeenAt;
-    if (v === null || v === undefined) continue;
-    map.set(r.userId, typeof v === 'bigint' ? Number(v) : v);
-  }
+  for (const r of rows) map[r.userId] = r.avatarUrl ?? null;
   return map;
 }
 
-export async function getAvatarUrlMap(userIds: string[]) {
+export async function setAvatarUrl(userId: string, avatarUrl: string | null): Promise<void> {
   await ensureProfileTable();
-  const map = new Map<string, string | null>();
-  if (!userIds.length) return map;
 
-  const rows = await prisma.$queryRaw<{ userId: string; avatarUrl: string | null }[]>(
-    Prisma.sql`
-      SELECT "userId", "avatarUrl"
-      FROM ${Prisma.raw(TABLE)}
-      WHERE "userId" IN (${Prisma.join(userIds)})
-    `,
-  );
+  const now = Date.now();
 
+  await prisma.$executeRaw`
+    INSERT INTO "UserProfile" ("userId", "avatarUrl", "updatedAtMs")
+    VALUES (${userId}, ${avatarUrl}, ${now})
+    ON CONFLICT("userId") DO UPDATE
+      SET "avatarUrl" = EXCLUDED."avatarUrl",
+          "updatedAtMs" = EXCLUDED."updatedAtMs";
+  `;
+}
+
+export async function setLastSeenAtMs(userId: string, lastSeenAtMs: number | null): Promise<void> {
+  await ensureProfileTable();
+
+  const now = Date.now();
+
+  if (lastSeenAtMs === null) {
+    // Clear last-seen when the user comes back online.
+    await prisma.$executeRaw`
+      INSERT INTO "UserProfile" ("userId", "lastSeenAtMs", "lastSeenAt", "updatedAtMs")
+      VALUES (${userId}, NULL, NULL, ${now})
+      ON CONFLICT("userId") DO UPDATE
+        SET "lastSeenAtMs" = NULL,
+            "lastSeenAt" = NULL,
+            "updatedAtMs" = EXCLUDED."updatedAtMs";
+    `;
+    return;
+  }
+
+  // Write both columns to be backward compatible with any older code expecting "lastSeenAt".
+  await prisma.$executeRaw`
+    INSERT INTO "UserProfile" ("userId", "lastSeenAtMs", "lastSeenAt", "updatedAtMs")
+    VALUES (${userId}, ${BigInt(lastSeenAtMs)}, ${BigInt(lastSeenAtMs)}, ${now})
+    ON CONFLICT("userId") DO UPDATE
+      SET "lastSeenAtMs" = EXCLUDED."lastSeenAtMs",
+          "lastSeenAt" = EXCLUDED."lastSeenAt",
+          "updatedAtMs" = EXCLUDED."updatedAtMs";
+  `;
+}
+
+export async function getAllLastSeenAtMsMap(): Promise<Record<string, number>> {
+  await ensureProfileTable();
+
+  // Prefer lastSeenAtMs; fall back to lastSeenAt if present.
+  const rows = await prisma.$queryRaw<Array<{ userId: string; lastSeenAtMs: bigint | null; lastSeenAt: bigint | null }>>`
+    SELECT "userId" AS "userId",
+           "lastSeenAtMs" AS "lastSeenAtMs",
+           "lastSeenAt" AS "lastSeenAt"
+    FROM "UserProfile";
+  `;
+
+  const map: Record<string, number> = {};
   for (const r of rows) {
-    map.set(r.userId, r.avatarUrl ?? null);
+    const v = r.lastSeenAtMs ?? r.lastSeenAt;
+    if (v !== null && v !== undefined) map[r.userId] = Number(v);
   }
   return map;
 }

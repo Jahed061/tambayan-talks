@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
@@ -25,8 +25,18 @@ function requireEmailVerification() {
   return String(process.env.REQUIRE_EMAIL_VERIFICATION ?? 'true').toLowerCase() !== 'false';
 }
 
-function appBaseUrl() {
-  return process.env.APP_BASE_URL || 'http://localhost:5173';
+function appBaseUrl(req: Request) {
+  // Prefer explicit config (best for Render), otherwise fall back to request origin/host.
+  const configured = (process.env.APP_BASE_URL || '').trim();
+  if (configured) return configured;
+
+  const origin = (req.get('origin') || '').trim();
+  if (origin) return origin;
+
+  const host = (req.get('host') || '').trim();
+  if (!host) return 'http://localhost:5173';
+  const proto = (req.get('x-forwarded-proto') || req.protocol || 'https').split(',')[0].trim();
+  return `${proto}://${host}`;
 }
 
 /**
@@ -167,7 +177,7 @@ router.post('/signup', async (req, res) => {
         expiresAtMs,
       });
 
-      const verifyUrl = `${appBaseUrl()}/#verify-email?token=${encodeURIComponent(token)}`;
+      const verifyUrl = `${appBaseUrl(req)}/#verify-email?token=${encodeURIComponent(token)}`;
 
       await sendMail({
         to: user.email,

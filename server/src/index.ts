@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+import cors, { type CorsOptions } from 'cors';
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import jwt from 'jsonwebtoken';
@@ -13,6 +13,7 @@ import uploadsRouter from './routes/uploads.routes';
 import authRouter from './routes/auth.routes';
 import profileRouter from './routes/profile.routes';
 import linkPreviewRouter from './routes/linkPreview.routes';
+import usersRouter from './routes/users.routes';
 import { requireAuth, type JwtUser } from './middleware/auth';
 
 import { prisma } from './prisma/client';
@@ -47,26 +48,77 @@ import { sendDmMessage } from './data/dms';
 import { getMessageDtoById } from './data/messageDto';
 import { upsertChannelReceipt, upsertDmReceipt } from './data/receipts';
 import { ensureProfileTable, getAllLastSeenAtMsMap, setLastSeenAtMs } from './services/profileStore';
-import usersRouter from "./routes/users.routes";
 
 const app = express();
 
-const FRONTEND_ORIGIN =
-  process.env.APP_BASE_URL || "https://tambayan-talks.onrender.com";
+// ---------------- CORS ----------------
+// Render deployments typically have the API on one domain and the Vite/Static site on another.
+// Configure allowed origins via CORS_ORIGINS (comma-separated). If unset, we allow all.
+function buildCorsOptions(): CorsOptions {
+  const raw = (process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || '').trim();
+  if (!raw || raw === '*') {
+    // origin:true reflects the request Origin, which plays nicely with multiple environments.
+    return {
+      origin: true,
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      credentials: false,
+    };
+  }
 
-// CORS for REST endpoints (important for Authorization header + browser preflight).
-app.use(
-  cors({
-    origin: FRONTEND_ORIGIN,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
+  const allow = new Set(
+    raw
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
+
+  return {
+    origin(origin, cb) {
+      // allow non-browser clients (no Origin header)
+      if (!origin) return cb(null, true);
+      return cb(null, allow.has(origin));
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: false,
+  };
+}
+
+const corsOptions = buildCorsOptions();
+
+// CORS: allow the Vite dev server (5173) and mobile devices on LAN.
+// Also ensure preflight requests succeed (important for WebView + Authorization header).
+app.use(cors(corsOptions));
+
+// Handle preflight early for every route
+// Handle preflight early for every route (Express v5/router doesn't accept '*' path)
+app.options(
+  /.*/,
+  cors(corsOptions),
 );
-
-// Always allow preflight requests to succeed (do NOT require auth for OPTIONS).
-app.options(/.*/, cors());
+//app.use(
+  //cors({
+    //origin: 'http://localhost:5173',
+    //methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    //allowedHeaders: ['Content-Type', 'Authorization'],
+    //credentials: false,
+  //})
+//);
 
 app.use(express.json());
+
+// Render health checks: keep it fast and reliable.
+app.get('/healthz', async (_req, res) => {
+  try {
+    // Lightweight DB check. If DATABASE_URL isn't set, Prisma will throw earlier anyway.
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error('healthz failed', err);
+    res.status(500).json({ ok: false });
+  }
+});
 
 // Serve uploaded files (images, PDFs, audio) from server/uploads
 const uploadsDir = path.resolve(process.cwd(), 'uploads');
@@ -85,20 +137,28 @@ app.use(
 // REST
 app.use('/api', authRouter);
 app.use('/api/profile', requireAuth, profileRouter);
+app.use('/api/users', requireAuth, usersRouter);
 app.use('/api/link-preview', requireAuth, linkPreviewRouter);
 app.use('/api/uploads', requireAuth, uploadsRouter);
 app.use('/api/dms', requireAuth, dmsRouter);
 app.use('/api/video-sessions', requireAuth, videoSessionsRouter);
 app.use('/api/channels', requireAuth, channelsRouter);
-app.use('/api/users', usersRouter);
-app.get("/health", (_req, res) => res.json({ ok: true }));
 
 const server = http.createServer(app);
 
-const io = new SocketIOServer (server, {
-  cors: { origin: FRONTEND_ORIGIN, methods: ["GET", "POST"], },
+const io = new SocketIOServer(server, {
+  cors: {
+    // Socket.IO uses a different CORS shape; keep it aligned with HTTP CORS.
+    origin: (origin, cb) => {
+      const raw = (process.env.CORS_ORIGINS || process.env.ALLOWED_ORIGINS || '').trim();
+      if (!raw || raw === '*') return cb(null, true);
+      const allow = new Set(raw.split(',').map((s) => s.trim()).filter(Boolean));
+      if (!origin) return cb(null, true);
+      return cb(null, allow.has(origin));
+    },
+    methods: ['GET', 'POST'],
+  },
 });
-
 
 // ---------------- Presence (online/offline) ----------------
 // userId -> set of socket ids (multiple tabs/devices)

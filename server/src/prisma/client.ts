@@ -1,47 +1,15 @@
-import 'dotenv/config';
-import { PrismaClient } from '../generated/prisma/client';
+import "dotenv/config";
+import { PrismaClient } from "../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";
 
-/**
- * Prisma adapter selection
- * - Local dev: SQLite (better-sqlite3)
- * - Render/prod: Postgres (@prisma/adapter-pg)
- *
- * We pick the adapter based on DATABASE_URL protocol.
- */
-
-const url = process.env.DATABASE_URL || 'file:./dev.db';
-
-function isPostgres(u: string) {
-  return u.startsWith('postgres://') || u.startsWith('postgresql://');
+const connectionString = process.env.DATABASE_URL;
+if (!connectionString) {
+  throw new Error("Missing DATABASE_URL");
 }
 
-let prisma: PrismaClient;
+const pool = new Pool({ connectionString });
+const adapter = new PrismaPg(pool);
 
-if (isPostgres(url)) {
-  // Lazy-require so local SQLite dev doesn't care about pg binaries unless needed.
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { PrismaPg } = require('@prisma/adapter-pg');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { Pool } = require('pg');
-
-  const pool = new Pool({
-    connectionString: url,
-    // Render Postgres requires SSL.
-    ssl: { rejectUnauthorized: false },
-  });
-
-  const adapter = new PrismaPg(pool);
-  prisma = new PrismaClient({ adapter });
-} else {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { PrismaBetterSqlite3 } = require('@prisma/adapter-better-sqlite3');
-
-  const adapter = new PrismaBetterSqlite3({
-    url,
-  });
-
-  prisma = new PrismaClient({ adapter });
-}
-
-export { prisma };
+export const prisma = new PrismaClient({ adapter });
 export default prisma;

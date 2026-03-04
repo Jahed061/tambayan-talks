@@ -1,23 +1,7 @@
-function resolveApiBaseUrl(): string {
-  const envApi = import.meta.env.VITE_API_URL as string | undefined;
-  if (envApi) return envApi;
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ?? `http://${window.location.hostname}:4000`;
 
-  // Heuristic for Render free hosting: frontend <name>.onrender.com -> api <name>-api.onrender.com
-  try {
-    const origin = window.location.origin;
-    const u = new URL(origin);
 
-    if (u.hostname.endsWith(".onrender.com") && !u.hostname.includes("-api")) {
-      return `${u.protocol}//${u.hostname.replace(".onrender.com", "-api.onrender.com")}`;
-    }
-
-    return origin;
-  } catch {
-    return "";
-  }
-}
-
-const API_BASE_URL = resolveApiBaseUrl();
 // Keep token in memory + storage (supports both localStorage and localStorage)
 let authToken: string | null =
   localStorage.getItem('token') ?? null;

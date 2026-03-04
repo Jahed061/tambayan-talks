@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { Socket } from 'socket.io-client';
-import { socket as sharedSocket } from '../socket';
+import { io, Socket } from 'socket.io-client';
 import {
   DMMessageDTO,
   DMThreadDTO,
@@ -30,6 +29,9 @@ import {
 
 type Props = { currentUser: CurrentUserDTO };
 
+const SOCKET_URL =
+  import.meta.env.VITE_SOCKET_URL ??
+  `http://${window.location.hostname}:4000`;
 
 type Toast = { id: string; title: string; body: string; kind?: 'error' | 'success' };
 
@@ -471,9 +473,7 @@ const PrivateMessagesPage: React.FC<Props> = ({ currentUser }) => {
 
     socketRef.current?.disconnect();
 
-    const socket: Socket = sharedSocket;
-    socket.auth = { token };
-    if (!socket.connected) socket.connect();
+    const socket = io(SOCKET_URL, { auth: { token } });
     socketRef.current = socket;
 
     const handleDmMessage = (dto: DMMessageDTO) => {
@@ -1071,8 +1071,8 @@ const PrivateMessagesPage: React.FC<Props> = ({ currentUser }) => {
                       textAlign: 'left',
                     }}
                   >
-                      <AvatarDot name={u.displayName} src={u.avatarUrl ?? null} size={34} />                    
-                      <div style={{ display: 'grid', gap: 2, minWidth: 0 }}>
+                    <AvatarDot name={u.displayName} src={u.avatarUrl ?? null} size={34} />
+                    <div style={{ display: 'grid', gap: 2, minWidth: 0 }}>
                       <div style={{ fontWeight: 950, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {highlight(u.displayName, userQuery)}
                       </div>

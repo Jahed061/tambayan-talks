@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { prisma } from '../prisma/client';
 import { getAvatarUrlMap } from '../services/profileStore';
-import { requireAuth } from '../middleware/auth';
 
 const router = Router();
 
@@ -12,7 +11,7 @@ function getAuthedUserId(req: any) {
 
 // GET /api/users/search?q=...
 // Returns lightweight user results for DM discovery.
-router.get('/search', requireAuth, async (req, res) => {
+router.get('/search', async (req, res) => {
   try {
     const currentUserId = getAuthedUserId(req);
     if (!currentUserId) return res.status(401).json({ error: 'Not authenticated' });

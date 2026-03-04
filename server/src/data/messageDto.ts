@@ -8,11 +8,6 @@ import type {
 import { prisma } from '../prisma/client';
 import { getAvatarUrlMap } from '../services/profileStore';
 
-function getAvatarUrl(avatarUrlByUserId: Record<string, string | null> | Map<string, string | null>, userId: string) {
-  if (avatarUrlByUserId instanceof Map) return avatarUrlByUserId.get(userId) ?? null;
-  return (avatarUrlByUserId as Record<string, string | null>)[userId] ?? null;
-}
-
 /**
  * Reactions are stored as arbitrary strings in the DB.
  *
@@ -93,7 +88,7 @@ function computeStatusForSender(deliveredCount: number, seenCount: number) {
 export function buildMessageDto(
   message: MessageWithRelations,
   currentUserId: string,
-  avatarUrlByUserId: Record<string, string | null> | Map<string, string | null> = {},
+  avatarUrlByUserId: Record<string, string | null> = {},
 ) {
   const receipts = message.receipts ?? [];
   const myReceipt = receipts.find((r) => r.userId === currentUserId) ?? null;
@@ -139,7 +134,7 @@ export function buildMessageDto(
           sender: {
             id: message.replyTo.sender.id,
             displayName: message.replyTo.sender.displayName,
-            avatarUrl: getAvatarUrl(avatarUrlByUserId, message.replyTo.sender.id),
+            avatarUrl: avatarUrlByUserId[message.replyTo.sender.id] ?? null,
           },
         } satisfies ReplyPreviewDTO)
       : null,
@@ -147,7 +142,7 @@ export function buildMessageDto(
     sender: {
       id: message.sender.id,
       displayName: message.sender.displayName,
-      avatarUrl: getAvatarUrl(avatarUrlByUserId, message.sender.id),
+      avatarUrl: avatarUrlByUserId[message.sender.id] ?? null,
     },
 
     attachments: (message.attachments ?? []).map(
