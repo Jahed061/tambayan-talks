@@ -758,7 +758,7 @@ useEffect(() => {
         kind,
         previewUrl,
       });
-    }
+    } 
 
     setPendingFiles((prev) => [...prev, ...next].slice(0, 8));
 
