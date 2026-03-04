@@ -1071,8 +1071,8 @@ const PrivateMessagesPage: React.FC<Props> = ({ currentUser }) => {
                       textAlign: 'left',
                     }}
                   >
-                    <AvatarDot name={u.displayName} url={u.avatarUrl ?? null} size={34} />
-                    <div style={{ display: 'grid', gap: 2, minWidth: 0 }}>
+                      <AvatarDot name={u.displayName} src={u.avatarUrl ?? null} size={34} />                    
+                      <div style={{ display: 'grid', gap: 2, minWidth: 0 }}>
                       <div style={{ fontWeight: 950, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {highlight(u.displayName, userQuery)}
                       </div>
