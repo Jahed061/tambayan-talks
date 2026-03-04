@@ -28,13 +28,13 @@ router.get('/search', async (req, res) => {
     const like = `%${q}%`;
 
     const rows = (await prisma.$queryRaw`
-      SELECT id, email, displayName, role
-      FROM User
-      WHERE id != ${currentUserId}
-        AND (LOWER(displayName) LIKE ${like} OR LOWER(email) LIKE ${like})
-      ORDER BY displayName ASC
-      LIMIT 20
-    `) as Array<{ id: string; email: string; displayName: string; role: string }>;
+  SELECT "id", "email", "displayName", "role"
+  FROM "User"
+  WHERE "id" != ${currentUserId}
+    AND (LOWER("displayName") LIKE ${like} OR LOWER("email") LIKE ${like})
+  ORDER BY "displayName" ASC
+  LIMIT 20
+`) as Array<{ id: string; email: string; displayName: string; role: string }>;
 
     const ids = rows.map((r) => r.id);
     const avatarMap = await getAvatarUrlMap(ids);
