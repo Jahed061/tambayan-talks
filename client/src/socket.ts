@@ -14,6 +14,7 @@ function resolveSocketBaseUrl(): string {
 }
 
 export const socket = io(resolveSocketBaseUrl(), {
+  auth: { token: localStorage.getItem('token') },
   transports: ["websocket", "polling"],
   withCredentials: true,
 });

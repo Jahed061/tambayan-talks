@@ -591,7 +591,11 @@ io.on('connection', (socket) => {
         return;
       }
 
-      await ensureDemoUser(senderId);
+      const exists = await prisma.user.findUnique({ where: { id: senderId } });
+      if (!exists) {
+        socket.emit('dm_error', { error: 'Unauthorized' });
+        return;
+      }
 
       try {
         const message = await sendDmMessage(senderId, threadId, String(content ?? ''), attachments);
